@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -145,6 +146,7 @@ namespace JWLRetriveEmail
                                         string attachmentPath = objCommon.GetConfigValue("AutomationFileLocation");
                                         string filePath = Convert.ToString(objCMDsResponse.DS.Tables[0].Rows[0]["FileLocation"]);
                                         string company_no = Convert.ToString(objCMDsResponse.DS.Tables[0].Rows[0]["CompanyNumber"]);
+                                        string customerNumber = "";
 
                                         attachmentPath = attachmentPath + @"\" + LocationCode + @"\" + filePath;
 
@@ -183,6 +185,7 @@ namespace JWLRetriveEmail
                                             if (objDsRes.dsResp.ResponseVal)
                                             {
                                                 dtConfiguredData = objDsRes.DS.Tables[0];
+                                                customerNumber = Convert.ToString(dtConfiguredData.Rows[0]["CustomerNumber"]);
                                             }
                                             else
                                             {
@@ -468,6 +471,7 @@ namespace JWLRetriveEmail
                                                     dtableOrderTemplate.Columns.Add("Total Bill");
                                                     dtableOrderTemplate.Columns.Add("Carrier Base Pay");
                                                     dtableOrderTemplate.Columns.Add("Carrier ACC");
+                                                    dtableOrderTemplate.Columns.Add("Carrier FSC");
                                                     dtableOrderTemplate.Columns.Add("Side Notes");
                                                     dtableOrderTemplate.Columns.Add("Pickup requested date");
                                                     dtableOrderTemplate.Columns.Add("Pickup will be ready by");
@@ -505,6 +509,25 @@ namespace JWLRetriveEmail
                                                     dtableOrderTemplate.Columns.Add("Pickup Room");
                                                     dtableOrderTemplate.Columns.Add("Pickup Attention");
                                                     dtableOrderTemplate.Columns.Add("Deliver Attention");
+
+                                                    //dtableOrderTemplate.Columns.Add("rate_buck_amt1");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt2");
+                                                    //  dtableOrderTemplate.Columns.Add("rate_buck_amt3");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt4");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt5");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt6");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt7");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt8");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt9");
+                                                    //  dtableOrderTemplate.Columns.Add("rate_buck_amt10");
+                                                    dtableOrderTemplate.Columns.Add("rate_buck_amt11");
+
+                                                    //  dtableOrderTemplate.Columns.Add("charge1");
+                                                    dtableOrderTemplate.Columns.Add("charge2");
+                                                    dtableOrderTemplate.Columns.Add("charge3");
+                                                    dtableOrderTemplate.Columns.Add("charge4");
+                                                    // dtableOrderTemplate.Columns.Add("charge5");
+                                                    //  dtableOrderTemplate.Columns.Add("charge6");
 
                                                     clsCommon.DSResponse objDsRes = new clsCommon.DSResponse();
                                                     objDsRes = objCommon.GetOrderPostTemplateDetails(CustomerName, LocationCode, ProductCode, ProductSubCode);
@@ -1753,6 +1776,239 @@ namespace JWLRetriveEmail
                                                         }
 
                                                         dtableOrderTemplate.TableName = "Template";
+
+                                                        //   DataTable dtableOrderTemplate1 = new DataTable();
+                                                        DataTable dtableOrderTemplateFinal = new DataTable();
+                                                        // to filter the data based on the customer reference and finding the number of pieces 
+                                                        if (CustomerName == objCommon.GetConfigValue("BBBCustomerName") && objCommon.GetConfigValue("BBBEnable_cartoncountsummary") == "Y")
+                                                        {
+                                                            DataView view = new DataView(dtableOrderTemplate);
+                                                            DataTable dtdistinctValues = view.ToTable(true, "Customer Reference");
+
+                                                            foreach (DataRow dr in dtdistinctValues.Rows)
+                                                            {
+                                                                object value = dr["Customer Reference"];
+                                                                if (value == DBNull.Value)
+                                                                    break;
+                                                                string ReferenceId = Convert.ToString(dr["Customer Reference"]);
+                                                                try
+                                                                {
+                                                                    if (dtableOrderTemplateFinal.Rows.Count > 0)
+                                                                    {
+                                                                        DataTable drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+                                                                        for (int row = 0; row < drresult.Rows.Count; row++)
+                                                                        {
+                                                                            DataRow dr1 = dtableOrderTemplateFinal.NewRow();
+                                                                            for (int column = 0; column < drresult.Columns.Count; column++)
+                                                                            {
+                                                                                dr1[column] = drresult.Rows[row][column];
+                                                                            }
+                                                                            dr1["Pieces"] = drresult.Rows.Count;
+                                                                            dtableOrderTemplateFinal.Rows.Add(dr1.ItemArray);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        DataRow[] drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'");
+                                                                        var firstRow = drresult.AsEnumerable().First();
+                                                                        //  firstRow.Table.Columns["Pieces"].DefaultValue = drresult.Length;
+                                                                        //firstRow.ItemArray[14] = drresult.Length;
+                                                                        // firstRow.AcceptChanges();
+                                                                        dtableOrderTemplateFinal = new[] { firstRow }.CopyToDataTable();
+                                                                        dtableOrderTemplateFinal.Rows[0]["Pieces"] = drresult.Length;
+                                                                        dtableOrderTemplateFinal.AcceptChanges();
+                                                                    }
+                                                                }
+                                                                catch (Exception ex)
+                                                                {
+                                                                    strExecutionLogMessage = "BBB summary file Creation Exception -" + ex.Message + System.Environment.NewLine;
+                                                                    strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                                    objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            dtableOrderTemplateFinal = dtableOrderTemplate.Copy();
+                                                        }
+
+                                                        //IsSeen = true;
+                                                        // To implement the logic for calculating the Billing and payable rates 
+
+                                                        clsCommon.DSResponse objBPRatesResponse = new clsCommon.DSResponse();
+                                                        objBPRatesResponse = objCommon.GetBillingRatesAndPayableRates_CustomerMappingDetails(company_no, customerNumber);
+                                                        if (objBPRatesResponse.dsResp.ResponseVal)
+                                                        {
+                                                            DataTable dtBillingRates = new DataTable();
+                                                            if (objBPRatesResponse.DS.Tables.Count > 0)
+                                                            {
+                                                                dtBillingRates = objBPRatesResponse.DS.Tables[0].Copy();
+                                                            }
+
+                                                            DataTable dtPayableRates = new DataTable();
+                                                            if (objBPRatesResponse.DS.Tables.Count > 1)
+                                                            {
+                                                                dtPayableRates = objBPRatesResponse.DS.Tables[1].Copy();
+                                                            }
+                                                            foreach (DataRow dr in dtableOrderTemplateFinal.Rows)
+                                                            {
+                                                                object value = dr["Delivery Date"];
+                                                                if (value == DBNull.Value)
+                                                                    break;
+
+                                                                DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(value.ToString(), @"\t", ""));
+
+                                                                var invCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+                                                                DataTable tblBillRatesFiltered = new DataTable();
+                                                                IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
+                                                                .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                if (billratesfilteredRows.Any())
+                                                                {
+                                                                    tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                                                                }
+
+                                                                DataTable tblPayableRatesFiltered = new DataTable();
+                                                                IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                                                                .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+
+                                                                if (payableratesfilteredRows.Any())
+                                                                {
+                                                                    tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                                                                }
+
+                                                                if (tblBillRatesFiltered.Rows.Count > 0)
+                                                                {
+                                                                    if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
+                                                                            dr["Bill Rate"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                                                                            dr["rate_buck_amt2"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
+                                                                            dr["Pieces ACC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"])))
+                                                                            dr["FSC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"]);
+
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                                                                            dr["rate_buck_amt4"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                                                                            dr["rate_buck_amt5"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                                                                            dr["rate_buck_amt6"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                                                                            dr["rate_buck_amt7"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                                                                            dr["rate_buck_amt8"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                                                                            dr["rate_buck_amt9"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                                                                            dr["rate_buck_amt11"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
+                                                                            dr["Bill Rate"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                                                                            dr["rate_buck_amt2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
+                                                                            dr["Pieces ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"])))
+                                                                            dr["FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"]);
+
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                                                                            dr["rate_buck_amt4"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                                                                            dr["rate_buck_amt5"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                                                                            dr["rate_buck_amt6"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                                                                            dr["rate_buck_amt7"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                                                                            dr["rate_buck_amt8"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                                                                            dr["rate_buck_amt9"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                                                                            dr["rate_buck_amt11"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                                                                    }
+                                                                }
+
+                                                                if (tblPayableRatesFiltered.Rows.Count > 0)
+                                                                {
+                                                                    if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                                                                            dr["Carrier Base Pay"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                                                                            dr["Carrier ACC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge6"])))
+                                                                            dr["Carrier FSC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
+                                                                            dr["charge2"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge3"])))
+                                                                            dr["charge3"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge3"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge4"])))
+                                                                            dr["charge4"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge4"]);
+
+                                                                    }
+                                                                    else
+                                                                    {
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                                                                            dr["Carrier Base Pay"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                                                                            dr["Carrier ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge6"])))
+                                                                            dr["Carrier FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
+                                                                            dr["charge2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge3"])))
+                                                                            dr["charge3"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge3"]);
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge4"])))
+                                                                            dr["charge4"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge4"]);
+
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+
                                                         IsSeen = true;
                                                         if (!info.Read && IsSeen)
                                                         {
@@ -1760,7 +2016,8 @@ namespace JWLRetriveEmail
                                                             strExecutionLogMessage = "Mark email as read, From :  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
                                                             objCommon.WriteExecutionLog(strExecutionLogMessage);
                                                         }
-                                                        clsExcelHelper.ExportDataToXLSX(dtableOrderTemplate, attachmentPath, strFileName);
+                                                        dtableOrderTemplateFinal.TableName = "Template";
+                                                        clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, strFileName);
                                                         objCommon.CleanAttachmentWorkingFolder();
 
                                                     }
