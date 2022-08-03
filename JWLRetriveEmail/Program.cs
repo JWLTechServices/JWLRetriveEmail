@@ -36,9 +36,7 @@ namespace JWLRetriveEmail
             string strEmailSubject = "";
             try
             {
-
                 string strExecutionLogMessage;
-
                 strExecutionLogMessage = "Beginning the new instance for " + AppName + " processing ";
                 objCommon.WriteExecutionLog(strExecutionLogMessage);
 
