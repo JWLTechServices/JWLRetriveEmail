@@ -16,8 +16,7 @@ namespace JWLRetriveEmail
     public static class Program
     {
         static void Main(string[] args)
-        {
-            // Added to Test in git hub
+        {           
             StartProcessing();
             clsCommon objCommon = new clsCommon();
             string AppName = objCommon.GetConfigValue("ApplicationName");
