@@ -16,7 +16,7 @@ namespace JWLRetriveEmail
     public static class Program
     {
         static void Main(string[] args)
-        {           
+        {
             StartProcessing();
             clsCommon objCommon = new clsCommon();
             string AppName = objCommon.GetConfigValue("ApplicationName");
@@ -242,6 +242,13 @@ namespace JWLRetriveEmail
                                         if (dsExcel.Tables.Count > 0)
                                         {
                                             DataTable dataTable = dsExcel.Tables[0];
+
+                                            if (dataTable.Rows.Count < 1)
+                                            {
+                                                strExecutionLogMessage = "No data found in the file  :  " + attname + System.Environment.NewLine;
+                                                strExecutionLogMessage += "But Still processed this file";
+                                                objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                            }
 
                                             clsCommon.DSResponse objDsResponse = new clsCommon.DSResponse();
 
@@ -1779,50 +1786,57 @@ namespace JWLRetriveEmail
                                                         // to filter the data based on the customer reference and finding the number of pieces 
                                                         if (CustomerName == objCommon.GetConfigValue("BBBCustomerName") && objCommon.GetConfigValue("BBBEnable_cartoncountsummary") == "Y")
                                                         {
-                                                            DataView view = new DataView(dtableOrderTemplate);
-                                                            DataTable dtdistinctValues = view.ToTable(true, "Customer Reference");
-
-                                                            foreach (DataRow dr in dtdistinctValues.Rows)
+                                                            int BBBEnableCartoncountsummaryOnly_orderlineitemAbove = int.Parse(objCommon.GetConfigValue("BBBEnableCartoncountsummaryOnly_orderlineitemAbove"));
+                                                            if (dtableOrderTemplate.Rows.Count < BBBEnableCartoncountsummaryOnly_orderlineitemAbove)
                                                             {
-                                                                object value = dr["Customer Reference"];
-                                                                if (value == DBNull.Value)
-                                                                    break;
-                                                                string ReferenceId = Convert.ToString(dr["Customer Reference"]);
-                                                                try
+                                                                dtableOrderTemplateFinal = dtableOrderTemplate.Copy();
+                                                            }
+                                                            else
+                                                            {
+                                                                DataView view = new DataView(dtableOrderTemplate);
+                                                                DataTable dtdistinctValues = view.ToTable(true, "Customer Reference");
+                                                                foreach (DataRow dr in dtdistinctValues.Rows)
                                                                 {
-                                                                    if (dtableOrderTemplateFinal.Rows.Count > 0)
+                                                                    object value = dr["Customer Reference"];
+                                                                    if (value == DBNull.Value)
+                                                                        break;
+                                                                    string ReferenceId = Convert.ToString(dr["Customer Reference"]);
+                                                                    try
                                                                     {
-                                                                        DataTable drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
-                                                                        for (int row = 0; row < drresult.Rows.Count; row++)
+                                                                        if (dtableOrderTemplateFinal.Rows.Count > 0)
                                                                         {
-                                                                            DataRow dr1 = dtableOrderTemplateFinal.NewRow();
-                                                                            for (int column = 0; column < drresult.Columns.Count; column++)
+                                                                            DataTable drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+                                                                            for (int row = 0; row < drresult.Rows.Count; row++)
                                                                             {
-                                                                                dr1[column] = drresult.Rows[row][column];
+                                                                                DataRow dr1 = dtableOrderTemplateFinal.NewRow();
+                                                                                for (int column = 0; column < drresult.Columns.Count; column++)
+                                                                                {
+                                                                                    dr1[column] = drresult.Rows[row][column];
+                                                                                }
+                                                                                dr1["Pieces"] = drresult.Rows.Count;
+                                                                                dtableOrderTemplateFinal.Rows.Add(dr1.ItemArray);
+                                                                                break;
                                                                             }
-                                                                            dr1["Pieces"] = drresult.Rows.Count;
-                                                                            dtableOrderTemplateFinal.Rows.Add(dr1.ItemArray);
-                                                                            break;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            DataRow[] drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'");
+                                                                            var firstRow = drresult.AsEnumerable().First();
+                                                                            //  firstRow.Table.Columns["Pieces"].DefaultValue = drresult.Length;
+                                                                            //firstRow.ItemArray[14] = drresult.Length;
+                                                                            // firstRow.AcceptChanges();
+                                                                            dtableOrderTemplateFinal = new[] { firstRow }.CopyToDataTable();
+                                                                            dtableOrderTemplateFinal.Rows[0]["Pieces"] = drresult.Length;
+                                                                            dtableOrderTemplateFinal.AcceptChanges();
                                                                         }
                                                                     }
-                                                                    else
+                                                                    catch (Exception ex)
                                                                     {
-                                                                        DataRow[] drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'");
-                                                                        var firstRow = drresult.AsEnumerable().First();
-                                                                        //  firstRow.Table.Columns["Pieces"].DefaultValue = drresult.Length;
-                                                                        //firstRow.ItemArray[14] = drresult.Length;
-                                                                        // firstRow.AcceptChanges();
-                                                                        dtableOrderTemplateFinal = new[] { firstRow }.CopyToDataTable();
-                                                                        dtableOrderTemplateFinal.Rows[0]["Pieces"] = drresult.Length;
-                                                                        dtableOrderTemplateFinal.AcceptChanges();
-                                                                    }
-                                                                }
-                                                                catch (Exception ex)
-                                                                {
-                                                                    strExecutionLogMessage = "BBB summary file Creation Exception -" + ex.Message + System.Environment.NewLine;
-                                                                    strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
-                                                                    objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+                                                                        strExecutionLogMessage = "BBB summary file Creation Exception -" + ex.Message + System.Environment.NewLine;
+                                                                        strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                                        objCommon.WriteErrorLog(ex, strExecutionLogMessage);
 
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -2013,6 +2027,7 @@ namespace JWLRetriveEmail
                                                             strExecutionLogMessage = "Mark email as read, From :  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
                                                             objCommon.WriteExecutionLog(strExecutionLogMessage);
                                                         }
+
                                                         dtableOrderTemplateFinal.TableName = "Template";
                                                         clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, strFileName);
                                                         objCommon.CleanAttachmentWorkingFolder();
