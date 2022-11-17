@@ -250,6 +250,99 @@ namespace JWLRetriveEmail
             return output;
         }
 
+
+        public static DataSet ImportExcelXLSXToDataSet_FSCRATES(string Filepath, bool hasHeaders, int company, int customernumber)
+        {
+            clsCommon objCommon = new clsCommon();
+            string HDR = (hasHeaders ? "Yes" : "No");
+
+            string strConn = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + Filepath + ";Extended Properties=\"Excel 12.0;HDR=" + HDR + ";IMEX=1\"";
+
+            DataSet output = new DataSet();
+
+            using (OleDbConnection conn = new OleDbConnection(strConn))
+            {
+                conn.Open();
+
+                System.Data.DataTable dt = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] {
+                null,
+                null,
+                null,
+                "TABLE"
+            });
+                // string sheet_name = "";
+                // string sheet = "Sheet1$";
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    string sheet = row["TABLE_NAME"].ToString();
+
+                    // string sqlSelect = "SELECT * FROM [" + sheet + "] ;";
+                    string sqlSelect = "SELECT * FROM [" + sheet + "]  where [Company]= @company AND [CustomerNumber]=@customernumber AND [IsActive] =@IsActive ";
+
+                    OleDbCommand comm = new OleDbCommand();
+                    comm.Connection = conn;
+                    comm.Parameters.AddWithValue("@Company", company);
+                    comm.Parameters.AddWithValue("@CustomerNumber", customernumber);
+                    comm.Parameters.AddWithValue("@IsActive", "Y");
+                    comm.CommandText = sqlSelect;
+
+                    //  OleDbCommand cmd = new OleDbCommand(sqlSelect, conn);
+                    System.Data.DataTable outputTable = new System.Data.DataTable(sheet);
+                    output.Tables.Add(outputTable);
+
+                    OleDbDataAdapter d = new OleDbDataAdapter(comm);
+                    try
+                    {
+                        d.Fill(outputTable);
+                    }
+                    catch (Exception ex)
+                    {
+                        objCommon.WriteErrorLog(ex, "ImportExcelXLSXToDataSet_FSCRATES");
+                    }
+                }
+            }
+            if (HDR == "No")
+            {
+                if (output != null)
+                {
+                    if (output.Tables.Count > 0)
+                    {
+                        if (output.Tables[0].Rows.Count > 0)
+                        {
+                            foreach (DataColumn column in output.Tables[0].Columns)
+                            {
+                                string cName = output.Tables[0].Rows[0][column.ColumnName].ToString();
+                                if (!output.Tables[0].Columns.Contains(cName) && cName != "")
+                                {
+                                    column.ColumnName = cName;
+                                }
+                            }
+
+                            output.Tables[0].Rows[0].Delete();
+                            output.Tables[0].AcceptChanges();
+                        }
+                    }
+                    if (output.Tables.Count > 1)
+                    {
+                        if (output.Tables[1].Rows.Count > 0)
+                        {
+                            foreach (DataColumn column in output.Tables[1].Columns)
+                            {
+                                string cName = output.Tables[1].Rows[0][column.ColumnName].ToString();
+                                if (!output.Tables[1].Columns.Contains(cName) && cName != "")
+                                {
+                                    column.ColumnName = cName;
+                                }
+                            }
+                            output.Tables[1].Rows[0].Delete();
+                            output.Tables[1].AcceptChanges();
+                        }
+                    }
+                }
+            }
+            return output;
+        }
         public static DataSet ImportCSV(string FileName, bool FirstRowHeader, string Delimiter, int SkipRows, System.Data.DataTable ColumnStruct = null)
         {
             clsCommon objCommon = new clsCommon();
@@ -366,7 +459,7 @@ namespace JWLRetriveEmail
             {
                 StreamReader sr = new StreamReader(strFilePath);
                 string[] headers = sr.ReadLine().Split(',');
-                
+
                 int count = 1;
                 foreach (string header in headers)
                 {
@@ -400,7 +493,7 @@ namespace JWLRetriveEmail
             dsRet.Tables.Add(dt);
             return dsRet;
         }
-        public static void ExportDataToXLSX(System.Data.DataTable dt, string strInputFilePath, string fileName)
+        public static void ExportDataToXLSX(System.Data.DataTable dt, string strInputFilePath, string fileName, string customerName = "")
         {
             clsCommon objCommon = new clsCommon();
             try
@@ -451,14 +544,21 @@ namespace JWLRetriveEmail
                             {
                                 oSheet.Cells[1, i] = dt.Columns[i - 1].ColumnName;
                             }
-                            oSheet.Cells[rowCount, i] = dr[i - 1].ToString();
+                            if (customerName == objCommon.GetConfigValue("BBWCustomerName"))
+                            {
+                                oSheet.Cells[rowCount, i] = "\t" + dr[i - 1].ToString();
+                            }
+                            else
+                            {
+                                oSheet.Cells[rowCount, i] = dr[i - 1].ToString();
+                            }
                         }
                     }
 
                     // Resize the columns 
                     // Range c1 = oSheet.Cells[1, 1];
                     // Range c2 = oSheet.Cells[rowCount, dt.Columns.Count];
-                    //  oRange = oSheet.get_Range(c1, c2);
+                    // oRange = oSheet.get_Range(c1, c2);
 
                     oRange = oSheet.get_Range(oSheet.Cells[1, 1],
                              oSheet.Cells[rowCount, dt.Columns.Count]);
@@ -490,15 +590,12 @@ namespace JWLRetriveEmail
                     GC.WaitForPendingFinalizers();
                     GC.Collect();
                 }
-
             }
             catch (Exception ex)
             {
                 objCommon.WriteErrorLog(ex, "ExportDataToXLSX");
             }
         }
-
-
 
     }
 }
