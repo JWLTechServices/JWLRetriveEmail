@@ -423,7 +423,8 @@ namespace JWLRetriveEmail
                                                                 executionLogMessage = "Mark email as read, From :  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
                                                                 objCommon.WriteExecutionLog(executionLogMessage);
                                                             }
-                                                            clsExcelHelper.ExportDataToXLSX(dtable, attachmentPath, fileName);
+                                                            //clsExcelHelper.ExportDataToXLSX(dtable, attachmentPath, fileName);
+                                                            clsExcelHelperNew.ExportDataTableToXLSX(dtable, attachmentPath, fileName);
                                                             objCommon.CleanAttachmentWorkingFolder();
                                                         }
                                                         else
@@ -463,7 +464,8 @@ namespace JWLRetriveEmail
                                                                     executionLogMessage = "Mark email as read, From :  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
                                                                     objCommon.WriteExecutionLog(executionLogMessage);
                                                                 }
-                                                                clsExcelHelper.ExportDataToXLSX(dataTable, attachmentPath, fileName, customerName);
+                                                                //clsExcelHelper.ExportDataToXLSX(dataTable, attachmentPath, fileName, customerName);
+                                                                clsExcelHelperNew.ExportDataTableToXLSX(dataTable, attachmentPath, fileName);
                                                                 objCommon.CleanAttachmentWorkingFolder();
 
                                                             }
@@ -577,1250 +579,13 @@ namespace JWLRetriveEmail
                                                         {
                                                             string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
                                                             DataTable dtOrderData = dsExcel.Tables[0];
-                                                            GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
 
-                                                            //try
-                                                            //{
-                                                            //    DataTable dtOrderData = dsExcel.Tables[0];
-
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_Date"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_Date"])].ColumnName = "Delivery Date";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Billing_Customer_Number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Billing_Customer_Number"])].ColumnName = "Billing Customer Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Customer_Reference"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Customer_Reference"])].ColumnName = "Customer Reference";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["BOL_Number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["BOL_Number"])].ColumnName = "BOL Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Customer_Name"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Customer_Name"])].ColumnName = "Customer Name";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Route_Number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Route_Number"])].ColumnName = "Route Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Original_Driver_No"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Original_Driver_No"])].ColumnName = "Original Driver No";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Correct_Driver_Number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Correct_Driver_Number"])].ColumnName = "Correct Driver Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_Name"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_Name"])].ColumnName = "Carrier Name";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Address"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Address"])].ColumnName = "Address";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["City"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["City"])].ColumnName = "City";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["State"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["State"])].ColumnName = "State";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Zip"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Zip"])].ColumnName = "Zip";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pieces"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pieces"])].ColumnName = "Pieces";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Miles"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Miles"])].ColumnName = "Miles";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_Zip"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_Zip"])].ColumnName = "Delivery Zip";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Zip_Code_Surcharge?"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Zip_Code_Surcharge?"])].ColumnName = "Zip Code Surcharge?";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Store_Code"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Store_Code"])].ColumnName = "Store_Code";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Type_of_Delivery"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Type_of_Delivery"])].ColumnName = "Type of Delivery";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Service_Type"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Service_Type"])].ColumnName = "Service Type";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Bill_Rate"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Bill_Rate"])].ColumnName = "Bill Rate";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pieces_ACC"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pieces_ACC"])].ColumnName = "Pieces ACC";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["FSC"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["FSC"])].ColumnName = "FSC";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Total_Bill"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Total_Bill"])].ColumnName = "Total Bill";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_Base_Pay"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_Base_Pay"])].ColumnName = "Carrier Base Pay";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_ACC"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Carrier_ACC"])].ColumnName = "Carrier ACC";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Side_Notes"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Side_Notes"])].ColumnName = "Side Notes";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_requested_date"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_requested_date"])].ColumnName = "Pickup requested date";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_will_be_ready_by"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_will_be_ready_by"])].ColumnName = "Pickup will be ready by";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_no_later_than"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_no_later_than"])].ColumnName = "Pickup no later than";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_date"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_date"])].ColumnName = "Pickup actual date";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_arrival_time"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_arrival_time"])].ColumnName = "Pickup actual arrival time";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_depart_time"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_actual_depart_time"])].ColumnName = "Pickup actual depart time";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_name"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_name"])].ColumnName = "Pickup name";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_address"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_address"])].ColumnName = "Pickup address";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_city"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_city"])].ColumnName = "Pickup city";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_state/province"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_state/province"])].ColumnName = "Pickup state/province";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_zip/postal_code"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_zip/postal_code"])].ColumnName = "Pickup zip/postal code";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_text_signature"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_text_signature"])].ColumnName = "Pickup text signature";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_requested_date"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_requested_date"])].ColumnName = "Delivery requested date";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Deliver_no_earlier_than"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Deliver_no_earlier_than"])].ColumnName = "Deliver no earlier than";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Deliver_no_later_than"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Deliver_no_later_than"])].ColumnName = "Deliver no later than";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_date"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_date"])].ColumnName = "Delivery actual date";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_arrive_time"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_arrive_time"])].ColumnName = "Delivery actual arrive time";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_depart_time"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_actual_depart_time"])].ColumnName = "Delivery actual depart time";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_text_signature"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Delivery_text_signature"])].ColumnName = "Delivery text signature";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Requested_by"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Requested_by"])].ColumnName = "Requested by";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Entered_by"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Entered_by"])].ColumnName = "Entered by";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_Delivery_Transfer_Flag"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Pickup_Delivery_Transfer_Flag"])].ColumnName = "Pickup Delivery Transfer Flag";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["weight"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["weight"])].ColumnName = "Weight";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["insurance_amount"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["insurance_amount"])].ColumnName = "Insurance Amount";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["master_airway_bill_number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["master_airway_bill_number"])].ColumnName = "Master airway bill number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["po_number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["po_number"])].ColumnName = "PO Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["house_airway_bill_number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["house_airway_bill_number"])].ColumnName = "House airway bill number";
-                                                            //    }
-
-                                                            //    //if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Dimensions"])))
-                                                            //    //{
-                                                            //    //    dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Dimensions"])].ColumnName = "Dimensions";
-                                                            //    //}
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_number"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_number"])].ColumnName = "Item Number";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_description"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_description"])].ColumnName = "Item Description";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_height"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_height"])].ColumnName = "Dim Height";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_length"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_length"])].ColumnName = "Dim Length";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_width"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["dim_width"])].ColumnName = "Dim Width";
-                                                            //    }
-
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["pickup_room"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["pickup_room"])].ColumnName = "Pickup Room";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["pickup_attention"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["pickup_attention"])].ColumnName = "Pickup Attention";
-                                                            //    }
-                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["deliver_attention"])))
-                                                            //    {
-                                                            //        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["deliver_attention"])].ColumnName = "Deliver Attention";
-                                                            //    }
-
-
-                                                            //    if (dtOrderData.Rows.Count > 0)
-                                                            //    {
-                                                            //        foreach (DataRow dr in dtOrderData.Rows)
-                                                            //        {
-                                                            //            DataRow _newRow = dtableOrderTemplate.NewRow();
-                                                            //            if (dr.Table.Columns.Contains("Delivery Date"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Date"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery Date"] = Convert.ToString(dr["Delivery Date"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery Date"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery Date"] = "";
-                                                            //            }
-
-                                                            //            _newRow["Company"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["CompanyNumber"]);
-
-                                                            //            if (dr.Table.Columns.Contains("Billing Customer Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Billing Customer Number"])))
-                                                            //                {
-                                                            //                    _newRow["Billing Customer Number"] = Convert.ToString(dr["Billing Customer Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Billing Customer Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Billing Customer Number"] = "";
-                                                            //            }
-
-                                                            //            if (dr.Table.Columns.Contains("Customer Reference"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Customer Reference"])))
-                                                            //                {
-                                                            //                    _newRow["Customer Reference"] = Convert.ToString(dr["Customer Reference"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Customer Reference"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Customer Reference"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("BOL Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["BOL Number"])))
-                                                            //                {
-                                                            //                    _newRow["BOL Number"] = Convert.ToString(dr["BOL Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["BOL Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["BOL Number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Customer Name"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Customer Name"])))
-                                                            //                {
-                                                            //                    _newRow["Customer Name"] = Convert.ToString(dr["Customer Name"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Customer Name"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Customer Name"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Route Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Route Number"])))
-                                                            //                {
-                                                            //                    _newRow["Route Number"] = Convert.ToString(dr["Route Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Route Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Route Number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Original Driver No"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Original Driver No"])))
-                                                            //                {
-                                                            //                    _newRow["Original Driver No"] = Convert.ToString(dr["Original Driver No"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Original Driver No"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Original Driver No"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Correct Driver Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Correct Driver Number"])))
-                                                            //                {
-                                                            //                    _newRow["Correct Driver Number"] = Convert.ToString(dr["Correct Driver Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Correct Driver Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Correct Driver Number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Carrier Name"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Carrier Name"])))
-                                                            //                {
-                                                            //                    _newRow["Carrier Name"] = Convert.ToString(dr["Carrier Name"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Carrier Name"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Carrier Name"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Address"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Address"])))
-                                                            //                {
-                                                            //                    _newRow["Address"] = Convert.ToString(dr["Address"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Address"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Address"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("City"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["City"])))
-                                                            //                {
-                                                            //                    _newRow["City"] = Convert.ToString(dr["City"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["City"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["City"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("State"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["State"])))
-                                                            //                {
-                                                            //                    _newRow["State"] = Convert.ToString(dr["State"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["State"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["State"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Zip"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Zip"])))
-                                                            //                {
-                                                            //                    _newRow["Zip"] = Convert.ToString(dr["Zip"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Zip"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Zip"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pieces"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
-                                                            //                {
-                                                            //                    _newRow["Pieces"] = Convert.ToString(dr["Pieces"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pieces"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pieces"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Miles"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
-                                                            //                {
-                                                            //                    _newRow["Miles"] = Convert.ToString(dr["Miles"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Miles"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Miles"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery Zip"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Zip"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery Zip"] = Convert.ToString(dr["Delivery Zip"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery Zip"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery Zip"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Zip Code Surcharge?"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Zip Code Surcharge?"])))
-                                                            //                {
-                                                            //                    _newRow["Zip Code Surcharge?"] = Convert.ToString(dr["Zip Code Surcharge?"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Zip Code Surcharge?"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Zip Code Surcharge?"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Store Code"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Store Code"])))
-                                                            //                {
-                                                            //                    _newRow["Store Code"] = Convert.ToString(dr["Store Code"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Store Code"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Store Code"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Type of Delivery"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Type of Delivery"])))
-                                                            //                {
-                                                            //                    _newRow["Type of Delivery"] = Convert.ToString(dr["Type of Delivery"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Type of Delivery"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Type of Delivery"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Service Type"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Service Type"])))
-                                                            //                {
-                                                            //                    _newRow["Service Type"] = Convert.ToString(dr["Service Type"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Service Type"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Service Type"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Bill Rate"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Bill Rate"])))
-                                                            //                {
-                                                            //                    _newRow["Bill Rate"] = Convert.ToString(dr["Bill Rate"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Bill Rate"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Bill Rate"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pieces ACC"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces ACC"])))
-                                                            //                {
-                                                            //                    _newRow["Pieces ACC"] = Convert.ToString(dr["Pieces ACC"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pieces ACC"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pieces ACC"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("FSC"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["FSC"])))
-                                                            //                {
-                                                            //                    _newRow["FSC"] = Convert.ToString(dr["FSC"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["FSC"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["FSC"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Total Bill"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Total Bill"])))
-                                                            //                {
-                                                            //                    _newRow["Total Bill"] = Convert.ToString(dr["Total Bill"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Total Bill"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Total Bill"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Carrier Base Pay"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Carrier Base Pay"])))
-                                                            //                {
-                                                            //                    _newRow["Carrier Base Pay"] = Convert.ToString(dr["Carrier Base Pay"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Carrier Base Pay"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Carrier Base Pay"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Carrier ACC"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Carrier ACC"])))
-                                                            //                {
-                                                            //                    _newRow["Carrier ACC"] = Convert.ToString(dr["Carrier ACC"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Carrier ACC"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Carrier ACC"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Side Notes"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Side Notes"])))
-                                                            //                {
-                                                            //                    _newRow["Side Notes"] = Convert.ToString(dr["Side Notes"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Side Notes"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Side Notes"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup requested date"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup requested date"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup requested date"] = Convert.ToString(dr["Pickup requested date"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup requested date"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup requested date"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup will be ready by"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup will be ready by"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup will be ready by"] = Convert.ToString(dr["Pickup will be ready by"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup will be ready by"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup will be ready by"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup no later than"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup no later than"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup no later than"] = Convert.ToString(dr["Pickup no later than"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup no later than"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup no later than"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup actual date"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual date"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup actual date"] = Convert.ToString(dr["Pickup actual date"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup actual date"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup actual date"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup actual arrival time"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual arrival time"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup actual arrival time"] = Convert.ToString(dr["Pickup actual arrival time"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup actual arrival time"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup actual arrival time"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup actual depart time"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual depart time"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup actual depart time"] = Convert.ToString(dr["Pickup actual depart time"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup actual depart time"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup actual depart time"] = "";
-                                                            //            }
-
-                                                            //            if (dr.Table.Columns.Contains("Pickup name"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup name"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup name"] = Convert.ToString(dr["Pickup name"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup name"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup name"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup address"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup address"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup address"] = Convert.ToString(dr["Pickup address"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup address"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup address"] = "";
-                                                            //            }
-
-                                                            //            if (dr.Table.Columns.Contains("Pickup city"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup city"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup city"] = Convert.ToString(dr["Pickup city"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup city"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup city"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup state/province"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup state/province"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup state/province"] = Convert.ToString(dr["Pickup state/province"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup state/province"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup state/province"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup zip/postal code"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup zip/postal code"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup zip/postal code"] = Convert.ToString(dr["Pickup zip/postal code"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup zip/postal code"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup zip/postal code"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup text signature"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup text signature"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup text signature"] = Convert.ToString(dr["Pickup text signature"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup text signature"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup text signature"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery requested date"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery requested date"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery requested date"] = Convert.ToString(dr["Delivery requested date"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery requested date"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery requested date"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Deliver no earlier than"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no earlier than"])))
-                                                            //                {
-                                                            //                    _newRow["Deliver no earlier than"] = Convert.ToString(dr["Deliver no earlier than"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Deliver no earlier than"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Deliver no earlier than"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Deliver no later than"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no later than"])))
-                                                            //                {
-                                                            //                    _newRow["Deliver no later than"] = Convert.ToString(dr["Deliver no later than"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Deliver no later than"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Deliver no later than"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery actual date"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual date"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery actual date"] = Convert.ToString(dr["Delivery actual date"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery actual date"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery actual date"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery actual arrive time"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual arrive time"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery actual arrive time"] = Convert.ToString(dr["Delivery actual arrive time"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery actual arrive time"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery actual arrive time"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery actual depart time"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual depart time"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery actual depart time"] = Convert.ToString(dr["Delivery actual depart time"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery actual depart time"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery actual depart time"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Delivery text signature"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery text signature"])))
-                                                            //                {
-                                                            //                    _newRow["Delivery text signature"] = Convert.ToString(dr["Delivery text signature"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Delivery text signature"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Delivery text signature"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Requested by"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Requested by"])))
-                                                            //                {
-                                                            //                    _newRow["Requested by"] = Convert.ToString(dr["Requested by"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Requested by"] = "";
-
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Requested by"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Entered by"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Entered by"])))
-                                                            //                {
-                                                            //                    _newRow["Entered by"] = Convert.ToString(dr["Entered by"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Entered by"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Entered by"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup Delivery Transfer Flag"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Delivery Transfer Flag"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup Delivery Transfer Flag"] = Convert.ToString(dr["Pickup Delivery Transfer Flag"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup Delivery Transfer Flag"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup Delivery Transfer Flag"] = "";
-                                                            //            }
-
-                                                            //            if (dr.Table.Columns.Contains("Weight"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Weight"])))
-                                                            //                {
-                                                            //                    _newRow["Weight"] = Convert.ToString(dr["Weight"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Weight"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Weight"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Insurance Amount"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Insurance Amount"])))
-                                                            //                {
-                                                            //                    _newRow["Insurance Amount"] = Convert.ToString(dr["Insurance Amount"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Insurance Amount"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Insurance Amount"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Master airway bill number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Master airway bill number"])))
-                                                            //                {
-                                                            //                    _newRow["Master airway bill number"] = Convert.ToString(dr["Master airway bill number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Master airway bill number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Master airway bill number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("PO Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["PO Number"])))
-                                                            //                {
-                                                            //                    _newRow["PO Number"] = Convert.ToString(dr["PO Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["PO Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["PO Number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("House airway bill number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["House airway bill number"])))
-                                                            //                {
-                                                            //                    _newRow["House airway bill number"] = Convert.ToString(dr["House airway bill number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["House airway bill number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["House airway bill number"] = "";
-                                                            //            }
-                                                            //            //if (dr.Table.Columns.Contains("Dimensions"))
-                                                            //            //{
-                                                            //            //    if (!string.IsNullOrEmpty(Convert.ToString(dr["Dimensions"])))
-                                                            //            //    {
-                                                            //            //        _newRow["Dimensions"] = Convert.ToString(dr["Dimensions"]);
-                                                            //            //    }
-                                                            //            //    else
-                                                            //            //    {
-                                                            //            //        _newRow["Dimensions"] = "";
-                                                            //            //    }
-                                                            //            //}
-                                                            //            //else
-                                                            //            //{
-                                                            //            //    _newRow["Dimensions"] = "";
-                                                            //            //}
-
-                                                            //            if (dr.Table.Columns.Contains("Item Number"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Item Number"])))
-                                                            //                {
-                                                            //                    _newRow["Item Number"] = Convert.ToString(dr["Item Number"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Item Number"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Item Number"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Item Description"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Item Description"])))
-                                                            //                {
-                                                            //                    _newRow["Item Description"] = Convert.ToString(dr["Item Description"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Item Description"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Item Description"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Dim Height"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Dim Height"])))
-                                                            //                {
-                                                            //                    _newRow["Dim Height"] = Convert.ToString(dr["Dim Height"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Dim Height"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Dim Height"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Dim Length"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Dim Length"])))
-                                                            //                {
-                                                            //                    _newRow["Dim Length"] = Convert.ToString(dr["Dim Length"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Dim Length"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Dim Length"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Dim Width"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Dim Width"])))
-                                                            //                {
-                                                            //                    _newRow["Dim Width"] = Convert.ToString(dr["Dim Width"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Dim Width"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Dim Width"] = "";
-                                                            //            }
-
-                                                            //            if (dr.Table.Columns.Contains("Pickup Room"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Room"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup Room"] = Convert.ToString(dr["Pickup Room"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup Room"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup Room"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Pickup Attention"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Attention"])))
-                                                            //                {
-                                                            //                    _newRow["Pickup Attention"] = Convert.ToString(dr["Pickup Attention"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Pickup Attention"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Pickup Attention"] = "";
-                                                            //            }
-                                                            //            if (dr.Table.Columns.Contains("Deliver Attention"))
-                                                            //            {
-                                                            //                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver Attention"])))
-                                                            //                {
-                                                            //                    _newRow["Deliver Attention"] = Convert.ToString(dr["Deliver Attention"]);
-                                                            //                }
-                                                            //                else
-                                                            //                {
-                                                            //                    _newRow["Deliver Attention"] = "";
-                                                            //                }
-                                                            //            }
-                                                            //            else
-                                                            //            {
-                                                            //                _newRow["Deliver Attention"] = "";
-                                                            //            }
-                                                            //            dtableOrderTemplate.Rows.Add(_newRow);
-                                                            //        }
-                                                            //    }
-                                                            //}
-                                                            //catch (Exception ex)
-                                                            //{
-                                                            //    strExecutionLogMessage = "OrderPostFile Creation Exception -" + ex.Message + System.Environment.NewLine;
-                                                            //    strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
-                                                            //    objCommon.WriteErrorLog(ex, strExecutionLogMessage);
-
-                                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
-                                                            //    objErrorResponse.error = "Found exception while processing the file";
-                                                            //    objErrorResponse.status = "Error";
-                                                            //    objErrorResponse.code = "Excception while creating the order post file.";
-                                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                            //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                            //    dsFailureResponse.Tables[0].TableName = "Order-Create-Input";
-                                                            //    objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0], fileName, strDatetime);
-                                                            //    continue;
-                                                            //}
-
-                                                            //dtableOrderTemplate.TableName = "Template";
+                                                            clsCommon.ReturnResponse objreturnResponseGenOrdTemplate = new clsCommon.ReturnResponse();
+                                                            objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
+                                                            if (!objreturnResponseGenOrdTemplate.ResponseVal)
+                                                            {
+                                                                continue;
+                                                            }
 
                                                             //   DataTable dtableOrderTemplate1 = new DataTable();
                                                             DataTable dtableOrderTemplateFinal = new DataTable();
@@ -2337,7 +1102,6 @@ namespace JWLRetriveEmail
 
                                                                             }
                                                                         }
-
                                                                     }
                                                                 }
                                                                 else
@@ -2508,8 +1272,8 @@ namespace JWLRetriveEmail
                                                             }
 
                                                             dtableOrderTemplateFinal.TableName = "Template";
-                                                            clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
-
+                                                            //clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
+                                                             clsExcelHelperNew.ExportDataTableToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
 
                                                             if (customerName == objCommon.GetConfigValue("BBBCustomerName") && productSubCode == "TND")
                                                             {
@@ -2527,8 +1291,13 @@ namespace JWLRetriveEmail
                                                                     dtableOrderTemplate.Clear();
                                                                     dtOrderData.Clear();
                                                                     dtOrderData = dsExcel.Tables[0];
-                                                                    GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
-                                                                    ProcessBBBDELfileToDataTable(fileName, dtableOrderTemplate, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber), attachmentPath);
+                                                                    objreturnResponseGenOrdTemplate = new clsCommon.ReturnResponse();
+                                                                    objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
+                                                                    if (objreturnResponseGenOrdTemplate.ResponseVal)
+                                                                    {
+                                                                        ProcessBBBDELfileToDataTable(fileName, dtableOrderTemplate, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber), attachmentPath);
+                                                                    }
+
                                                                 }
                                                             }
                                                             objCommon.CleanAttachmentWorkingFolder();
@@ -3700,6 +2469,10 @@ namespace JWLRetriveEmail
             double billRate = 0;
             double billRate1 = 0;
 
+            double carrierBasepay = 0;
+            double carrierBasepay1 = 0;
+
+
             string executionLogMessage = "";
             string OriginlafileName = fileName;
             try
@@ -3729,7 +2502,7 @@ namespace JWLRetriveEmail
                     {
                         DataTable dtWeightData = new DataTable();
                         dtWeightData.Columns.Add("Customer Reference", typeof(string));
-                        dtWeightData.Columns.Add("Weight", typeof(int));
+                        dtWeightData.Columns.Add("Weight", typeof(double));
 
                         if (dtableOrderTemplateFinal.Rows.Count > 0)
                         {
@@ -3757,7 +2530,7 @@ namespace JWLRetriveEmail
                                          return row1;
                                      }).CopyToDataTable();
 
-                                dr1["Weight"] = dtWeightData.Rows[0]["Weight"];
+                                dr1["Weight"] = Math.Round(Convert.ToDouble(dtWeightData.Rows[0]["Weight"]));
                                 //}
                                 //catch (Exception ex)
                                 //{
@@ -3801,7 +2574,7 @@ namespace JWLRetriveEmail
                                      return row;
                                  }).CopyToDataTable();
 
-                            dtableOrderTemplateFinal.Rows[0]["Weight"] = dtWeightData.Rows[0]["Weight"];
+                            dtableOrderTemplateFinal.Rows[0]["Weight"] = Math.Round(Convert.ToDouble(dtWeightData.Rows[0]["Weight"]));
 
                             //}
                             //catch (Exception ex)
@@ -3829,8 +2602,11 @@ namespace JWLRetriveEmail
                 //  }
 
 
+
+
                 DataTable dtBBBStoreBands = new DataTable();
                 DataTable dtBBBDificitWeightRating = new DataTable();
+                DataTable dtBBBDificitWeightRatingPayable = new DataTable();
                 clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
                 objDificitRatesResponse = objCommon.GetStoreBand_DeficitWeightRatingDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
                 if (objDificitRatesResponse.dsResp.ResponseVal)
@@ -3843,9 +2619,63 @@ namespace JWLRetriveEmail
                     {
                         dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
                     }
+                    if (objDificitRatesResponse.DS.Tables.Count > 2)
+                    {
+                        dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
+                    }
                 }
 
-                // Foreach will start from here
+
+                DataTable dtFSCRates = new DataTable();
+                DataTable dtFSCRatesfromDB = new DataTable();
+                DataTable tblFSCRatesFiltered = new DataTable();
+                string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
+                DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
+                {
+                    dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
+                }
+                else
+                {
+                    executionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                    executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                    executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                    string fromMail = objCommon.GetConfigValue("FromMailID");
+                    string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                    string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                    string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
+                    string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                    objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                    throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+                }
+
+
+                //DataTable dtCarrierFSCBillableRates = new DataTable();
+                DataTable dtCarrierFSCRatesfromDB = new DataTable();
+                DataTable tblCarrierFSCRatesFiltered = new DataTable();
+
+                //string strCarrierFscRateDetailsfilepath = objCommon.GetConfigValue("CarrierFSCRatesCustomerMappingFilepath");
+                //DataSet dsCarrierFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strCarrierFscRateDetailsfilepath, true, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                //if (dsCarrierFscData != null && dsCarrierFscData.Tables[0].Rows.Count > 0)
+                //{
+                //    dtCarrierFSCBillableRates = dsCarrierFscData.Tables["CarrierFSCRatesMapping$"];
+                //}
+
+                clsCommon.DSResponse objfscRatesResponse = new clsCommon.DSResponse();
+                objfscRatesResponse = objCommon.GetFSCRates_MappingDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                if (objfscRatesResponse.dsResp.ResponseVal)
+                {
+                    if (objfscRatesResponse.DS.Tables.Count > 0)
+                    {
+                        dtFSCRatesfromDB = objfscRatesResponse.DS.Tables[0];
+                    }
+                    if (objfscRatesResponse.DS.Tables.Count > 1)
+                    {
+                        dtCarrierFSCRatesfromDB = objfscRatesResponse.DS.Tables[1];
+                    }
+                }
 
                 DataTable dtBillingRates = new DataTable();
                 DataTable dtPayableRates = new DataTable();
@@ -3880,11 +2710,12 @@ namespace JWLRetriveEmail
                     billRate = 0;
                     billRate1 = 0;
 
-                    int weight = Convert.ToInt32((dr["Weight"]));
+                    int weight = Convert.ToInt32(dr["Weight"]);
                     string bolNumber = (Convert.ToString(dr["BOL Number"]));
 
                     string storenumber = Regex.Replace(bolNumber, @"\t", "");
-
+                    string deliveryName = Convert.ToString(dr["Customer Name"]);
+                    deliveryName = deliveryName.Replace("'", "");
                     //if(storenumber.Length > 6)
                     //{
                     //    storenumber = storenumber.Substring(3, 4);
@@ -3978,8 +2809,71 @@ namespace JWLRetriveEmail
                         {
                             billRate = maxRate;
                         }
+                        billRate = Math.Round(billRate, 2);
+                        dr["Bill Rate"] = billRate;
+                    }
 
-                        dr["Bill Rate"] = Math.Round(billRate);
+
+                    minRate = 0;
+                    maxRate = 0;
+                    actualRate = 0;
+                    rangeSerial = 0;
+                    carrierBasepay = 0;
+                    carrierBasepay1 = 0;
+
+                    DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
+                    IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                              .Where(row => (row.Field<int>("Band") == band)
+                                                                              && (row.Field<int>("WeightFrom") <= weight)
+                                                                              && (weight <= row.Field<int>("WeightTo")));
+
+                    if (deficitWeightRatingPayablefilteredRows.Any())
+                    {
+                        dtDeficitWeightRatingPayablefiltered = deficitWeightRatingPayablefilteredRows.CopyToDataTable();
+                    }
+
+                    if (dtDeficitWeightRatingPayablefiltered.Rows.Count > 0)
+                    {
+                        actualRate = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                        minRate = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["MinRate"]);
+                        maxRate = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["MaxRate"]);
+                        rangeSerial = Convert.ToInt32(dtDeficitWeightRatingPayablefiltered.Rows[0]["RangeSerial"]);
+
+                        carrierBasepay = Convert.ToDouble(Convert.ToDouble(Convert.ToDouble(weight) / 100) * actualRate);
+
+                        if (carrierBasepay < minRate)
+                        {
+                            carrierBasepay = minRate;
+                        }
+                        if (carrierBasepay > minRate)
+                        {
+                            rangeSerial = rangeSerial + 1;
+
+                            DataTable dtDeficitWeightRatingPayablefiltered1 = new DataTable();
+                            IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows1 = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                                      .Where(row => (row.Field<int>("Band") == band)
+                                                                                      && (row.Field<int>("RangeSerial") == rangeSerial));
+                            if (deficitWeightRatingPayablefilteredRows1.Any())
+                            {
+                                dtDeficitWeightRatingPayablefiltered = deficitWeightRatingPayablefilteredRows1.CopyToDataTable();
+                                int weightFrom = Convert.ToInt32(dtDeficitWeightRatingPayablefiltered.Rows[0]["WeightFrom"]);
+                                int WeightTo = Convert.ToInt32(dtDeficitWeightRatingPayablefiltered.Rows[0]["WeightTo"]);
+                                actualRate = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                carrierBasepay1 = Convert.ToDouble(Convert.ToDouble(Convert.ToDouble(weightFrom) / 100) * actualRate);
+
+                                if (carrierBasepay1 < carrierBasepay)
+                                {
+                                    carrierBasepay = carrierBasepay1;
+                                }
+                            }
+                        }
+
+                        if (carrierBasepay > maxRate)
+                        {
+                            carrierBasepay = maxRate;
+                        }
+                        carrierBasepay = Math.Round(carrierBasepay, 2);
+                        dr["Carrier Base Pay"] = carrierBasepay;
                     }
 
                     DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(value.ToString(), @"\t", ""));
@@ -4005,24 +2899,146 @@ namespace JWLRetriveEmail
                         tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
                     }
 
+
+                    DataTable tblFSCBillRatesFiltered = new DataTable();
+                    double fscratePercentage = 0;
+                    double carrierfscratePercentage = 0;
+
+                    string fscratetype = string.Empty;
+                    string carrierfscratetype = string.Empty;
+
+                    IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+                    && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                    if (fscbillratesfilteredRows.Any())
+                    {
+                        tblFSCBillRatesFiltered = fscbillratesfilteredRows.CopyToDataTable();
+
+                        decimal fuelcharge = 0;
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"])))
+                        {
+                            fuelcharge = Convert.ToDecimal(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"]));
+                        }
+                        else
+                        {
+                            executionLogMessage = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString() + System.Environment.NewLine;
+                            executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values." + System.Environment.NewLine;
+                            executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                            objCommon.WriteExecutionLog(executionLogMessage);
+                            string fromMail = objCommon.GetConfigValue("FromMailID");
+                            string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                            string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                            string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                            string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
+                            objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                            throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
+                        }
+
+                        if (dtFSCRatesfromDB.Rows.Count > 0)
+                        {
+                            IEnumerable<DataRow> fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                            .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                             && row.Field<string>("DeliveryName") == deliveryName);
+
+                            if (fscratesfilteredRows.Any())
+                            {
+                                tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                                fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                            }
+                            else
+                            {
+
+                                fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                               .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                                && row.Field<string>("DeliveryName") is null);
+                                if (fscratesfilteredRows.Any())
+                                {
+                                    tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                                    fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                    fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                                }
+                                else
+                                {
+                                    executionLogMessage = "FSC Billing Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                    executionLogMessage += "So not able to process this file, please update the billable rates mapping table with appropriate values";
+                                    executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                    string fromMail = objCommon.GetConfigValue("FromMailID");
+                                    string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                    string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                    string toMail = objCommon.GetConfigValue("ToMailID");
+                                    string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                    objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                                    throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
+                                }
+                            }
+                        }
+                        if (dtCarrierFSCRatesfromDB.Rows.Count > 0)
+                        {
+                            IEnumerable<DataRow> CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                            .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                            && (fuelcharge <= row.Field<decimal>("Stop"))
+                            && row.Field<string>("DeliveryName") == deliveryName);
+
+                            if (CarrierfscratesfilteredRows.Any())
+                            {
+                                tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                                carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                            }
+                            else
+                            {
+                                CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                            .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                            && (fuelcharge <= row.Field<decimal>("Stop"))
+                            && row.Field<string>("DeliveryName") is null);
+                                if (CarrierfscratesfilteredRows.Any())
+                                {
+                                    tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                                    carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                    carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                                }
+                                else
+                                {
+                                    executionLogMessage = "FSC Payable Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                    executionLogMessage += "So not able to process this file, please update the payable rates mapping table with appropriate values";
+                                    executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                    string fromMail = objCommon.GetConfigValue("FromMailID");
+                                    string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                    string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                    string toMail = objCommon.GetConfigValue("ToMailID");
+                                    string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                    objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                                    throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
+                    {
+                        if (fscratetype.ToString().ToUpper() == "F")
+                        {
+                            dr["FSC"] = Math.Round(Convert.ToDouble(fscratePercentage), 2);
+                        }
+                        else
+                        {
+                            dr["FSC"] = Math.Round(Convert.ToDouble(billRate * fscratePercentage) / 100, 2);
+                        }
+                    }
                     if (tblBillRatesFiltered.Rows.Count > 0)
                     {
                         if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
                         {
-                            //if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
-                            //{
-                            //    dr["Bill Rate"] = billRate;
-                            //}
-                            // dr["Bill Rate"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
                                 dr["rate_buck_amt2"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
                                 dr["Pieces ACC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
-
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"])))
-                                dr["FSC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
                                 dr["rate_buck_amt4"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
@@ -4048,11 +3064,6 @@ namespace JWLRetriveEmail
                         }
                         else
                         {
-                            //if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
-                            //{
-                            //    dr["Bill Rate"] = billRate;
-                            //}
-                            //dr["Bill Rate"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
                                 dr["rate_buck_amt2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
@@ -4060,8 +3071,6 @@ namespace JWLRetriveEmail
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
                                 dr["Pieces ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
 
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"])))
-                                dr["FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
                                 dr["rate_buck_amt4"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
@@ -4087,18 +3096,26 @@ namespace JWLRetriveEmail
                         }
                     }
 
+                    if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                    {
+                        if (carrierfscratetype.ToString().ToUpper() == "F")
+                        {
+                            dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                        }
+                        else
+                        {
+                            dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierBasepay * carrierfscratePercentage) / 100, 2);
+                        }
+                    }
+
                     if (tblPayableRatesFiltered.Rows.Count > 0)
                     {
+
                         if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
                         {
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
-                                dr["Carrier Base Pay"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
                                 dr["Carrier ACC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
-
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge6"])))
-                                dr["Carrier FSC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
                                 dr["charge2"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
@@ -4112,15 +3129,9 @@ namespace JWLRetriveEmail
                         }
                         else
                         {
-
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
-                                dr["Carrier Base Pay"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
-
                             if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
                                 dr["Carrier ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
 
-                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge6"])))
-                                dr["Carrier FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
 
                             if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
                                 dr["charge2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
@@ -4136,8 +3147,8 @@ namespace JWLRetriveEmail
                 }
 
                 dtableOrderTemplateFinal.TableName = "Template";
-                clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
-                // objCommon.CleanAttachmentWorkingFolder();
+                //clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
+                clsExcelHelperNew.ExportDataTableToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
             }
             catch (Exception ex)
             {
@@ -4161,13 +3172,14 @@ namespace JWLRetriveEmail
 
             return true;
         }
-        private static void GenerateOrderTemplate(ref DataTable dtableOrderTemplate, DataTable dtOrderData,
+        private static clsCommon.ReturnResponse GenerateOrderTemplate(ref DataTable dtableOrderTemplate, DataTable dtOrderData,
             string fileName, string customerName, string locationCode,
             string productCode, string productSubCode)
         {
 
             clsCommon objCommon = new clsCommon();
 
+            clsCommon.ReturnResponse returnResponse = new clsCommon.ReturnResponse();
             string executionLogMessage = string.Empty;
             //  DataTable dtableOrderTemplate = new DataTable();
             dtableOrderTemplate.Clear();
@@ -5385,9 +4397,11 @@ namespace JWLRetriveEmail
                             dtableOrderTemplate.Rows.Add(_newRow);
                         }
                     }
+                    returnResponse.ResponseVal = true;
                 }
                 catch (Exception ex)
                 {
+                    returnResponse.ResponseVal = false;
                     executionLogMessage = "OrderPostFile Creation Exception -" + ex.Message + System.Environment.NewLine;
                     executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
                     objCommon.WriteErrorLog(ex, executionLogMessage);
@@ -5400,10 +4414,13 @@ namespace JWLRetriveEmail
                     DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                     dsFailureResponse.Tables[0].TableName = "Order-Create-Input";
                     objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0], fileName, strDatetime);
+
                 }
 
                 dtableOrderTemplate.TableName = "Template";
+
             }
+            return returnResponse;
         }
     }
 }

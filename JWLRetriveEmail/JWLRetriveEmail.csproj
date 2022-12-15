@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="adodb, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\ADODB.7.10.3077\lib\adodb.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
       <HintPath>..\packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
@@ -102,6 +106,7 @@
   <ItemGroup>
     <Compile Include="clsCommon.cs" />
     <Compile Include="clsExcelHelper.cs" />
+    <Compile Include="clsExcelHelperNew.cs" />
     <Compile Include="clsRoute.cs" />
     <Compile Include="Email.cs" />
     <Compile Include="Program.cs" />
