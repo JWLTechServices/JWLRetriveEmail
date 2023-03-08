@@ -565,6 +565,64 @@ namespace JWLRetriveEmail
             }
         }
 
+
+        public void WriteDataToCsvFile(System.Data.DataTable dataTable, string filePath, string fileName, string Datetime)
+        {
+            try
+            {
+
+               // string strOutputFileLocation;
+                string outputFile;
+
+              //  strOutputFileLocation = GetConfigValue("OutputFilesWorkingFolder");
+
+                if (!System.IO.Directory.Exists(filePath + @"\"))
+                    System.IO.Directory.CreateDirectory(filePath + @"\");
+
+
+                int fileExtPos = fileName.LastIndexOf(".");
+                if (fileExtPos >= 0)
+                    fileName = fileName.Substring(0, fileExtPos);
+
+                if(!string.IsNullOrEmpty(fileName))
+                     outputFile = fileName + "-" + dataTable.TableName + "-" + Datetime;
+                else
+                    outputFile = dataTable.TableName + "-" + Datetime;
+
+                outputFile = filePath + @"\" + outputFile + ".csv"; // ".csv";
+
+                StringBuilder fileContent = new StringBuilder();
+                StringBuilder HeaderContent = new StringBuilder();
+
+                if (!File.Exists(outputFile))
+                {
+                    foreach (var col in dataTable.Columns)
+                    {
+                        HeaderContent.Append(col.ToString() + ",");
+                    }
+                    HeaderContent.Replace(",", System.Environment.NewLine, HeaderContent.Length - 1, 1);
+                    File.WriteAllText(outputFile, HeaderContent.ToString());
+                }
+
+                foreach (DataRow dr in dataTable.Rows)
+                {
+                    foreach (var column in dr.ItemArray)
+                    {
+                        fileContent.Append("\"" + column.ToString() + "\",");
+                    }
+
+                    fileContent.Replace(",", System.Environment.NewLine, fileContent.Length - 1, 1);
+
+                }
+                File.AppendAllText(outputFile, fileContent.ToString());
+            }
+            catch (Exception ex)
+            {
+                string strExecutionLogMessage = "Exception in WriteDataToCsvFile" + System.Environment.NewLine;
+                WriteErrorLog(ex, strExecutionLogMessage);
+
+            }
+        }
         public DSResponse GetOrderPostTemplateDetails(string CustomerName, string LocationCode, string ProductCode, string ProductSubCode)
         {
             DSResponse objResponse = new DSResponse();

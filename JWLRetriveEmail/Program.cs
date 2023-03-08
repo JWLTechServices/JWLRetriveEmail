@@ -15,11 +15,17 @@ namespace JWLRetriveEmail
 {
     public static class Program
     {
+        public static bool missingDieselPriceFlag = false;
+        public static string missingDieselPriceFilePath = "";
+        public static bool bandDetailsMissingFlag = false;
+        public static string bandDetailsMissingFilePath = "";
+        public static bool pricingInfoMissingFlag = false;
+        public static string pricingInfoMissingFilePath = "";
+        public static bool fscInfoMissingFlag = false;
+        public static string fscInfoMissingFilePath = "";
+
         static void Main(string[] args)
         {
-            //  DataTable dt = new DataTable();
-            // ProcessBBBDELfileToDataTable("", dt);
-            // return;
 
             StartProcessing();
             clsCommon objCommon = new clsCommon();
@@ -37,6 +43,7 @@ namespace JWLRetriveEmail
             clsCommon objCommon = new clsCommon();
             string appName = objCommon.GetConfigValue("ApplicationName");
             string emailSubject = "";
+            string datetime = DateTime.Now.ToString("yyyyMMddHHmmss");
             try
             {
                 string executionLogMessage;
@@ -157,6 +164,10 @@ namespace JWLRetriveEmail
                                             string company_no = Convert.ToString(objCMDsResponse.DS.Tables[0].Rows[0]["CompanyNumber"]);
                                             string customerNumber = "";
 
+                                            DataTable dtCDSBadData = new DataTable();
+                                            DataTable dtCDSMissingConfigData = new DataTable();
+                                            string customerrefmappingcolumnname = string.Empty;
+
                                             attachmentPath = attachmentPath + @"\" + locationCode + @"\" + filePath;
 
                                             if (!System.IO.Directory.Exists(tempfilePath))
@@ -260,6 +271,7 @@ namespace JWLRetriveEmail
                                                 {
                                                     dtConfiguredData = objDsRes.DS.Tables[0];
                                                     customerNumber = Convert.ToString(dtConfiguredData.Rows[0]["CustomerNumber"]);
+                                                    customerrefmappingcolumnname = Convert.ToString(dtConfiguredData.Rows[0]["Customer_Reference"]);
                                                 }
                                                 else
                                                 {
@@ -273,10 +285,12 @@ namespace JWLRetriveEmail
                                                     objCommon.WriteExecutionLog(executionLogMessage);
                                                     continue;
                                                 }
-                                                if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
-                                                {
-                                                    dsExcel = CDSGenerateOrderDataTable(dsExcel.Tables[0], dtConfiguredData, productSubCode);
-                                                }
+                                                //if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
+                                                //{
+                                                dtCDSBadData = dsExcel.Tables[0].Copy();
+                                                dtCDSMissingConfigData = dsExcel.Tables[0].Copy();
+                                                dsExcel = CDSGenerateOrderDataTable(dsExcel.Tables[0], dtConfiguredData, productSubCode);
+                                                // }
                                             }
                                             if (dsExcel.Tables.Count > 0)
                                             {
@@ -338,7 +352,7 @@ namespace JWLRetriveEmail
                                                                 if (objDsResponse.dsResp.ResponseVal)
                                                                 {
                                                                     string strInputFilePath = "";
-                                                                    string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+
 
                                                                     clsRoute objclsRoute = new clsRoute();
                                                                     clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
@@ -408,7 +422,7 @@ namespace JWLRetriveEmail
                                                                             DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                                                                             dsFailureResponse.Tables[0].TableName = "RouteStopGetAPI";
                                                                             objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
-                                                           fileName, strDatetime);
+                                                           fileName, datetime);
                                                                             continue;
                                                                         }
                                                                     }
@@ -573,15 +587,43 @@ namespace JWLRetriveEmail
                                                         // dtableOrderTemplate.Columns.Add("charge5");
                                                         //  dtableOrderTemplate.Columns.Add("charge6");
 
+
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt1");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code1");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt2");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code2");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt3");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code3");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt4");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code4");
+
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt5");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code5");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_amt6");
+                                                        dtableOrderTemplate.Columns.Add("add_charge_code6");
+                                                        dtableOrderTemplate.Columns.Add("Pickup special instr long");
+                                                        dtableOrderTemplate.Columns.Add("status_code");
+
+
+                                                        if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
+                                                        {
+                                                            dtableOrderTemplate.Columns.Add("UnitCount");
+                                                            dtableOrderTemplate.Columns.Add("Actual Receive Date");
+                                                            dtableOrderTemplate.Columns.Add("Stairs");
+                                                            dtableOrderTemplate.Columns.Add("Manufacturer");
+                                                            dtableOrderTemplate.Columns.Add("Delivery Type");
+                                                            dtableOrderTemplate.Columns.Add("Men");
+                                                        }
+
                                                         clsCommon.DSResponse objDsRes = new clsCommon.DSResponse();
                                                         objDsRes = objCommon.GetOrderPostTemplateDetails(customerName, locationCode, productCode, productSubCode);
                                                         if (objDsRes.dsResp.ResponseVal)
                                                         {
-                                                            string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                                                            // string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
                                                             DataTable dtOrderData = dsExcel.Tables[0];
 
                                                             clsCommon.ReturnResponse objreturnResponseGenOrdTemplate = new clsCommon.ReturnResponse();
-                                                            objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
+                                                            objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode, datetime);
                                                             if (!objreturnResponseGenOrdTemplate.ResponseVal)
                                                             {
                                                                 continue;
@@ -672,7 +714,11 @@ namespace JWLRetriveEmail
                                                                 }
 
                                                                 // For CDS client Billing and payable amount calculation
-                                                                if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
+                                                                if (customerName == objCommon.GetConfigValue("CDSCustomerName") && objCommon.GetConfigValue("CDSEnableNewCalculation") == "Y")
+                                                                {
+                                                                    GenerateCDSOrderTemplate(ref dtableOrderTemplateFinal, dtBillingRates, dtPayableRates, dtCDSBadData, dtCDSMissingConfigData, company_no, customerNumber, fileName, datetime, customerrefmappingcolumnname);
+                                                                }
+                                                                else if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
                                                                 {
                                                                     DataTable dtFSCRates = new DataTable();
                                                                     DataTable dtFSCRatesfromDB = new DataTable();
@@ -901,11 +947,11 @@ namespace JWLRetriveEmail
                                                                         if (tblBillRatesFiltered.Rows.Count > 0)
                                                                         {
                                                                             double billRate = 0;
-                                                                            double minimunRate = 0; ;
+                                                                            double minimumRate = 0; ;
 
-                                                                            if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["minimun_rate"])))
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["minimum_rate"])))
                                                                             {
-                                                                                minimunRate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["minimun_rate"]); ;
+                                                                                minimumRate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["minimum_rate"]); ;
                                                                             }
 
                                                                             if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
@@ -913,9 +959,9 @@ namespace JWLRetriveEmail
                                                                                 if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
                                                                                 {
                                                                                     billRate = Convert.ToDouble(1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]));
-                                                                                    if (billRate < minimunRate)
+                                                                                    if (billRate < minimumRate)
                                                                                     {
-                                                                                        billRate = minimunRate;
+                                                                                        billRate = minimumRate;
                                                                                     }
                                                                                     dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
                                                                                 }
@@ -965,9 +1011,9 @@ namespace JWLRetriveEmail
                                                                                 if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
                                                                                 {
                                                                                     billRate = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
-                                                                                    if (billRate < minimunRate)
+                                                                                    if (billRate < minimumRate)
                                                                                     {
-                                                                                        billRate = minimunRate;
+                                                                                        billRate = minimumRate;
                                                                                     }
                                                                                     dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
                                                                                 }
@@ -1019,10 +1065,10 @@ namespace JWLRetriveEmail
                                                                         if (tblPayableRatesFiltered.Rows.Count > 0)
                                                                         {
                                                                             double carrierBasePay = 0;
-                                                                            double minimunRate = 0;
-                                                                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["minimun_rate"])))
+                                                                            double minimumRate = 0;
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["minimum_rate"])))
                                                                             {
-                                                                                minimunRate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["minimun_rate"]);
+                                                                                minimumRate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["minimum_rate"]);
                                                                             }
 
                                                                             if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
@@ -1030,9 +1076,9 @@ namespace JWLRetriveEmail
                                                                                 if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
                                                                                 {
                                                                                     carrierBasePay = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
-                                                                                    if (carrierBasePay < minimunRate)
+                                                                                    if (carrierBasePay < minimumRate)
                                                                                     {
-                                                                                        carrierBasePay = minimunRate;
+                                                                                        carrierBasePay = minimumRate;
                                                                                     }
                                                                                     dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
                                                                                 }
@@ -1069,9 +1115,9 @@ namespace JWLRetriveEmail
                                                                                 {
                                                                                     // dr["Carrier Base Pay"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
                                                                                     carrierBasePay = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
-                                                                                    if (carrierBasePay < minimunRate)
+                                                                                    if (carrierBasePay < minimumRate)
                                                                                     {
-                                                                                        carrierBasePay = minimunRate;
+                                                                                        carrierBasePay = minimumRate;
                                                                                     }
                                                                                     dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
                                                                                 }
@@ -1211,6 +1257,15 @@ namespace JWLRetriveEmail
                                                                                     dr["rate_buck_amt11"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
 
                                                                             }
+
+                                                                            if (productSubCode == "TND")
+                                                                            {
+                                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Bill Rate"])))
+                                                                                {
+                                                                                    if (Convert.ToInt32(Convert.ToDouble(dr["Bill Rate"])) == 0)
+                                                                                        dr["status_code"] = "R";
+                                                                                }
+                                                                            }
                                                                         }
 
                                                                         if (tblPayableRatesFiltered.Rows.Count > 0)
@@ -1263,6 +1318,27 @@ namespace JWLRetriveEmail
                                                                 }
                                                             }
 
+                                                            DataTable dtConfiguredData = new DataTable();
+                                                            if (customerName == objCommon.GetConfigValue("BBBCustomerName") && productSubCode == "TND")
+                                                            {
+                                                                objDsRes = new clsCommon.DSResponse();
+                                                                productSubCode = "DEL";
+                                                                objDsRes = objCommon.GetOrderPostTemplateDetails(customerName, locationCode, productCode, productSubCode);
+                                                                if (objDsRes.dsResp.ResponseVal)
+                                                                {
+                                                                    dtConfiguredData = objDsRes.DS.Tables[0];
+                                                                    customerNumber = Convert.ToString(dtConfiguredData.Rows[0]["CustomerNumber"]);
+
+                                                                    clsCommon.ReturnResponse objReturnResponse = new clsCommon.ReturnResponse();
+                                                                    //  ValidateBBBDataForDEL
+                                                                    objReturnResponse = ValidateBBBDataForDEL(fileName, dtableOrderTemplate, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber), attachmentPath, datetime);
+                                                                    if (!objReturnResponse.ResponseVal)
+                                                                    {
+                                                                        continue;
+                                                                    }
+                                                                }
+                                                            }
+
                                                             IsSeen = true;
                                                             if (!info.Read && IsSeen)
                                                             {
@@ -1273,31 +1349,30 @@ namespace JWLRetriveEmail
 
                                                             dtableOrderTemplateFinal.TableName = "Template";
                                                             //clsExcelHelper.ExportDataToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
-                                                             clsExcelHelperNew.ExportDataTableToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
+                                                            clsExcelHelperNew.ExportDataTableToXLSX(dtableOrderTemplateFinal, attachmentPath, fileName);
 
-                                                            if (customerName == objCommon.GetConfigValue("BBBCustomerName") && productSubCode == "TND")
+                                                            if (customerName == objCommon.GetConfigValue("BBBCustomerName") && productSubCode == "DEL")
                                                             {
-                                                                DataTable dtConfiguredData = new DataTable();
-                                                                objDsRes = new clsCommon.DSResponse();
-                                                                productSubCode = "DEL";
-                                                                objDsRes = objCommon.GetOrderPostTemplateDetails(customerName, locationCode, productCode, productSubCode);
-                                                                if (objDsRes.dsResp.ResponseVal)
+                                                                // DataTable dtConfiguredData = new DataTable();
+                                                                // objDsRes = new clsCommon.DSResponse();
+                                                                //// productSubCode = "DEL";
+                                                                // objDsRes = objCommon.GetOrderPostTemplateDetails(customerName, locationCode, productCode, productSubCode);
+                                                                // if (objDsRes.dsResp.ResponseVal)
+                                                                // {
+                                                                //     dtConfiguredData = objDsRes.DS.Tables[0];
+                                                                //     customerNumber = Convert.ToString(dtConfiguredData.Rows[0]["CustomerNumber"]);
+                                                                // }
+
+                                                                dsExcel = ConvertBBBDELFlatfileToDataTable(tempfilePath + @"\" + fileName,
+                                                                       dtConfiguredData);
+                                                                dtableOrderTemplate.Clear();
+                                                                dtOrderData.Clear();
+                                                                dtOrderData = dsExcel.Tables[0];
+                                                                objreturnResponseGenOrdTemplate = new clsCommon.ReturnResponse();
+                                                                objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode, datetime);
+                                                                if (objreturnResponseGenOrdTemplate.ResponseVal)
                                                                 {
-                                                                    dtConfiguredData = objDsRes.DS.Tables[0];
-                                                                    customerNumber = Convert.ToString(dtConfiguredData.Rows[0]["CustomerNumber"]);
-
-                                                                    dsExcel = ConvertBBBDELFlatfileToDataTable(tempfilePath + @"\" + fileName,
-                                                                        dtConfiguredData);
-                                                                    dtableOrderTemplate.Clear();
-                                                                    dtOrderData.Clear();
-                                                                    dtOrderData = dsExcel.Tables[0];
-                                                                    objreturnResponseGenOrdTemplate = new clsCommon.ReturnResponse();
-                                                                    objreturnResponseGenOrdTemplate = GenerateOrderTemplate(ref dtableOrderTemplate, dtOrderData, fileName, customerName, locationCode, productCode, productSubCode);
-                                                                    if (objreturnResponseGenOrdTemplate.ResponseVal)
-                                                                    {
-                                                                        ProcessBBBDELfileToDataTable(fileName, dtableOrderTemplate, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber), attachmentPath);
-                                                                    }
-
+                                                                    ProcessBBBDELfileToDataTable(fileName, dtableOrderTemplate, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber), attachmentPath);
                                                                 }
                                                             }
                                                             objCommon.CleanAttachmentWorkingFolder();
@@ -1409,6 +1484,47 @@ namespace JWLRetriveEmail
                 try
                 {
                     oClient.Quit();
+                    if (missingDieselPriceFlag)
+                    {
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("BBBSendMissingDieselPriceEmail");
+                        string subject = "Diesel price missing records attached with this email";
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, missingDieselPriceFilePath);
+                    }
+
+                    if (bandDetailsMissingFlag)
+                    {
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("BBBSendBandDetailsMissingEmail");
+                        string subject = "Band details missing records attached with this email";
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, bandDetailsMissingFilePath);
+                    }
+
+                    if (pricingInfoMissingFlag)
+                    {
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("BBBSendPricingInfoMissingEmail");
+                        string subject = "Pricing info missing records attached with this email";
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, pricingInfoMissingFilePath);
+                    }
+
+                    if (fscInfoMissingFlag)
+                    {
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("BBBSendFSCInfoMissingEmail");
+                        string subject = "FSC info missing records attached with this email";
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, fscInfoMissingFilePath);
+                    }
+
+
                 }
                 catch (Exception ex)
                 {
@@ -2729,7 +2845,7 @@ namespace JWLRetriveEmail
                     DataTable dtstorebandsfiltered = new DataTable();
 
                     IEnumerable<DataRow> storebandsfilteredRows = dtBBBStoreBands.AsEnumerable()
-                                                          .Where(row => row.Field<string>("Store") == storenumber);
+                                                          .Where(row => row.Field<string>("Store") == storenumber && row.Field<string>("IsActive") == "Y");
                     if (storebandsfilteredRows.Any())
                     {
                         dtstorebandsfiltered = storebandsfilteredRows.CopyToDataTable();
@@ -2738,10 +2854,16 @@ namespace JWLRetriveEmail
                     if (dtstorebandsfiltered.Rows.Count > 0)
                     {
                         band = Convert.ToInt16(dtstorebandsfiltered.Rows[0]["Band"]);
+
+                        if (band == 0)
+                        {
+                            dr["Pickup special instr long"] = "Band for store " + storenumber + " = 0";
+                            dr["status_code"] = "R";
+                        }
                     }
                     else
                     {
-                        executionLogMessage = "Band Details not found for this store number : " + storenumber + System.Environment.NewLine;
+                        executionLogMessage = "Band Details not found for this store number : " + storenumber + " - Original file: " + OriginlafileName + System.Environment.NewLine;
                         executionLogMessage += "So not able to process this file, please update the Store Band details table  with appropriate values." + System.Environment.NewLine;
                         executionLogMessage += "Processing file Name : " + fileName + System.Environment.NewLine;
                         executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
@@ -2752,9 +2874,9 @@ namespace JWLRetriveEmail
                         string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                         string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
                         string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
-                        string subject = "Band Details not found for this store number : " + storenumber;
+                        string subject = "Band Details not found for this store number : " + storenumber + " - Original file: " + OriginlafileName;
                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
-                        throw new NullReferenceException("Band Details not found for this store number : " + storenumber);
+                        throw new NullReferenceException("Band Details not found for this store number : " + storenumber + "- Original file: " + OriginlafileName);
 
                     }
 
@@ -2762,7 +2884,7 @@ namespace JWLRetriveEmail
                     IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtBBBDificitWeightRating.AsEnumerable()
                                                                               .Where(row => (row.Field<int>("Band") == band)
                                                                               && (row.Field<int>("WeightFrom") <= weight)
-                                                                              && (weight <= row.Field<int>("WeightTo")));
+                                                                              && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
 
                     if (deficitWeightRatingfilteredRows.Any())
                     {
@@ -2789,7 +2911,8 @@ namespace JWLRetriveEmail
                             DataTable dtDeficitWeightRatingfiltered1 = new DataTable();
                             IEnumerable<DataRow> deficitWeightRatingfilteredRows1 = dtBBBDificitWeightRating.AsEnumerable()
                                                                                       .Where(row => (row.Field<int>("Band") == band)
-                                                                                      && (row.Field<int>("RangeSerial") == rangeSerial));
+                                                                                      && (row.Field<int>("RangeSerial") == rangeSerial)
+                                                                                      && row.Field<string>("IsActive") == "Y");
                             if (deficitWeightRatingfilteredRows1.Any())
                             {
                                 dtDeficitWeightRatingfiltered = deficitWeightRatingfilteredRows1.CopyToDataTable();
@@ -2812,6 +2935,10 @@ namespace JWLRetriveEmail
                         billRate = Math.Round(billRate, 2);
                         dr["Bill Rate"] = billRate;
                     }
+                    else
+                    {
+                        dr["Pickup special instr long"] = "Pricing Info missing for store" + storenumber;
+                    }
 
 
                     minRate = 0;
@@ -2825,7 +2952,8 @@ namespace JWLRetriveEmail
                     IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
                                                                               .Where(row => (row.Field<int>("Band") == band)
                                                                               && (row.Field<int>("WeightFrom") <= weight)
-                                                                              && (weight <= row.Field<int>("WeightTo")));
+                                                                              && (weight <= row.Field<int>("WeightTo"))
+                                                                              && row.Field<string>("IsActive") == "Y");
 
                     if (deficitWeightRatingPayablefilteredRows.Any())
                     {
@@ -2852,7 +2980,8 @@ namespace JWLRetriveEmail
                             DataTable dtDeficitWeightRatingPayablefiltered1 = new DataTable();
                             IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows1 = dtBBBDificitWeightRatingPayable.AsEnumerable()
                                                                                       .Where(row => (row.Field<int>("Band") == band)
-                                                                                      && (row.Field<int>("RangeSerial") == rangeSerial));
+                                                                                      && (row.Field<int>("RangeSerial") == rangeSerial)
+                                                                                      && row.Field<string>("IsActive") == "Y");
                             if (deficitWeightRatingPayablefilteredRows1.Any())
                             {
                                 dtDeficitWeightRatingPayablefiltered = deficitWeightRatingPayablefilteredRows1.CopyToDataTable();
@@ -2882,7 +3011,8 @@ namespace JWLRetriveEmail
 
                     DataTable tblBillRatesFiltered = new DataTable();
                     IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
-                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate") && row.Field<string>("IsActive") == "Y")
+                    && row.Field<string>("IsActive") == "Y");
 
                     if (billratesfilteredRows.Any())
                     {
@@ -2891,7 +3021,8 @@ namespace JWLRetriveEmail
 
                     DataTable tblPayableRatesFiltered = new DataTable();
                     IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
-                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate") && row.Field<string>("IsActive") == "Y")
+                    && row.Field<string>("IsActive") == "Y");
 
 
                     if (payableratesfilteredRows.Any())
@@ -2929,7 +3060,7 @@ namespace JWLRetriveEmail
                             string fromMail = objCommon.GetConfigValue("FromMailID");
                             string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                             string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                            string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                            string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
                             string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
                             objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                             throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
@@ -2939,7 +3070,7 @@ namespace JWLRetriveEmail
                         {
                             IEnumerable<DataRow> fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
                             .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
-                             && row.Field<string>("DeliveryName") == deliveryName);
+                             && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
 
                             if (fscratesfilteredRows.Any())
                             {
@@ -2952,7 +3083,7 @@ namespace JWLRetriveEmail
 
                                 fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
                                .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
-                                && row.Field<string>("DeliveryName") is null);
+                                && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
                                 if (fscratesfilteredRows.Any())
                                 {
                                     tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
@@ -2980,7 +3111,7 @@ namespace JWLRetriveEmail
                             IEnumerable<DataRow> CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
                             .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
                             && (fuelcharge <= row.Field<decimal>("Stop"))
-                            && row.Field<string>("DeliveryName") == deliveryName);
+                            && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
 
                             if (CarrierfscratesfilteredRows.Any())
                             {
@@ -2993,7 +3124,7 @@ namespace JWLRetriveEmail
                                 CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
                             .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
                             && (fuelcharge <= row.Field<decimal>("Stop"))
-                            && row.Field<string>("DeliveryName") is null);
+                            && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
                                 if (CarrierfscratesfilteredRows.Any())
                                 {
                                     tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
@@ -3157,9 +3288,606 @@ namespace JWLRetriveEmail
                 executionLogMessage += ex.Message;
                 objCommon.WriteExecutionLog(executionLogMessage);
                 objCommon.WriteErrorLog(ex, "ProcessBBBDELfileToDataTable");
-                string subject = "Found Exception for while processing this file for Delivey, Please look into it immediately, File Name   : " + fileName;
+                string subject = "Found Exception while processing this file for Delivey, Please look into it immediately, File Name   : " + fileName;
                 objCommon.SendExceptionMail(subject, executionLogMessage);
             }
+        }
+
+        private static clsCommon.ReturnResponse ValidateBBBDataForDEL(string fileName, DataTable dtableOrderTemplate,
+            int company_no, int customerNumber, string attachmentPath, string datetime)
+        {
+
+            clsCommon.ReturnResponse objReturnResponse = new clsCommon.ReturnResponse();
+
+            objReturnResponse.ResponseVal = true;
+            clsCommon objCommon = new clsCommon();
+            int band = 0;
+            string executionLogMessage = "";
+            string OriginlafileName = fileName;
+
+            DataTable dtMissingDieselPriceData = new DataTable();
+            dtMissingDieselPriceData.Columns.Add("Original File Name");
+            dtMissingDieselPriceData.Columns.Add("Validating File Name");
+            dtMissingDieselPriceData.Columns.Add("Error");
+            dtMissingDieselPriceData.Columns.Add("Delivery Date");
+
+
+            DataTable dtBandDetailsMissingData = new DataTable();
+            dtBandDetailsMissingData.Columns.Add("Original File Name");
+            dtBandDetailsMissingData.Columns.Add("Validating File Name");
+            dtBandDetailsMissingData.Columns.Add("Error");
+            dtBandDetailsMissingData.Columns.Add("Store Number");
+
+
+            DataTable dtPricingInfoMissingData = new DataTable();
+            dtPricingInfoMissingData.Columns.Add("Original File Name");
+            dtPricingInfoMissingData.Columns.Add("Validating File Name");
+            dtPricingInfoMissingData.Columns.Add("Error");
+            dtPricingInfoMissingData.Columns.Add("Store Number");
+            dtPricingInfoMissingData.Columns.Add("Band");
+
+
+            DataTable dtFSCInfoMissingData = new DataTable();
+            dtFSCInfoMissingData.Columns.Add("Original File Name");
+            dtFSCInfoMissingData.Columns.Add("Validating File Name");
+            dtFSCInfoMissingData.Columns.Add("Error");
+            dtFSCInfoMissingData.Columns.Add("Store Number");
+            dtFSCInfoMissingData.Columns.Add("Band");
+            dtFSCInfoMissingData.Columns.Add("Fuel Charge");
+
+
+            try
+            {
+
+                fileName = fileName.Replace("TND", "DEL");
+
+                DataTable dtableOrderTemplateFinal = new DataTable();
+
+                DataView view = new DataView(dtableOrderTemplate);
+                DataTable dtdistinctValues = view.ToTable(true, "Customer Reference");
+                foreach (DataRow dr in dtdistinctValues.Rows)
+                {
+                    object value = dr["Customer Reference"];
+                    if (value == DBNull.Value)
+                        break;
+                    string ReferenceId = Convert.ToString(dr["Customer Reference"]);
+                    try
+                    {
+                        DataTable dtWeightData = new DataTable();
+                        dtWeightData.Columns.Add("Customer Reference", typeof(string));
+                        dtWeightData.Columns.Add("Weight", typeof(double));
+
+                        if (dtableOrderTemplateFinal.Rows.Count > 0)
+                        {
+
+                            DataTable dtresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+                            for (int row = 0; row < dtresult.Rows.Count;)
+                            {
+                                DataRow dr1 = dtableOrderTemplateFinal.NewRow();
+                                for (int column = 0; column < dtresult.Columns.Count; column++)
+                                {
+                                    dr1[column] = dtresult.Rows[row][column];
+                                }
+                                dr1["Pieces"] = dtresult.Rows.Count;
+
+                                dtWeightData.Clear();
+                                dtWeightData = dtresult.AsEnumerable()
+                                     .GroupBy(r => r.Field<string>("Customer Reference"))
+                                     .Select(g =>
+                                     {
+                                         var row1 = dtWeightData.NewRow();
+                                         row1["Customer Reference"] = g.Key;
+                                         row1["Weight"] = g.Sum(r => Convert.ToDouble(r.Field<string>("Weight")));
+                                         return row1;
+                                     }).CopyToDataTable();
+
+                                dr1["Weight"] = Math.Round(Convert.ToDouble(dtWeightData.Rows[0]["Weight"]));
+                                dtableOrderTemplateFinal.Rows.Add(dr1.ItemArray);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            DataRow[] drresult = dtableOrderTemplate.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'");
+                            var firstRow = drresult.AsEnumerable().First();
+                            dtableOrderTemplateFinal = new[] { firstRow }.CopyToDataTable();
+                            dtableOrderTemplateFinal.Rows[0]["Pieces"] = drresult.Length;
+
+                            DataTable dtTemptableOrderTemplate = new DataTable();
+
+                            string customerrefernce = Convert.ToString(dr["Customer Reference"]);
+                            dtTemptableOrderTemplate = dtableOrderTemplate.AsEnumerable()
+                                                                 .Where(x => x.Field<string>("Customer Reference") == customerrefernce)
+                                                                 .CopyToDataTable();
+                            dtWeightData.Clear();
+                            dtWeightData = dtTemptableOrderTemplate.AsEnumerable()
+                                 .GroupBy(r => r.Field<string>("Customer Reference"))
+                                 .Select(g =>
+                                 {
+                                     var row = dtWeightData.NewRow();
+                                     row["Customer Reference"] = g.Key;
+                                     row["Weight"] = g.Sum(r => Convert.ToDouble(r.Field<string>("Weight")));
+                                     return row;
+                                 }).CopyToDataTable();
+
+                            dtableOrderTemplateFinal.Rows[0]["Weight"] = Math.Round(Convert.ToDouble(dtWeightData.Rows[0]["Weight"]));
+                            dtableOrderTemplateFinal.AcceptChanges();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        executionLogMessage = "BBB summary file Creation Exception -" + ex.Message + System.Environment.NewLine;
+                        executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                        executionLogMessage += "Originla file Name " + OriginlafileName;
+                        objCommon.WriteErrorLog(ex, "ValidateBBBDataForDEL -" + executionLogMessage);
+                        string subject = "Found Exception for while generating the summary and not processed this file for Delivey, Please look into it immediately, File Name   : " + fileName;
+                        objCommon.SendExceptionMail(subject, executionLogMessage);
+
+                        objReturnResponse.ResponseVal = false;
+                        objReturnResponse.Reason = executionLogMessage;
+                        return objReturnResponse;
+                    }
+                }
+
+
+                DataTable dtBBBStoreBands = new DataTable();
+                DataTable dtBBBDificitWeightRating = new DataTable();
+                DataTable dtBBBDificitWeightRatingPayable = new DataTable();
+                clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
+                objDificitRatesResponse = objCommon.GetStoreBand_DeficitWeightRatingDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                if (objDificitRatesResponse.dsResp.ResponseVal)
+                {
+                    if (objDificitRatesResponse.DS.Tables.Count > 0)
+                    {
+                        dtBBBStoreBands = objDificitRatesResponse.DS.Tables[0];
+                    }
+                    if (objDificitRatesResponse.DS.Tables.Count > 1)
+                    {
+                        dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
+                    }
+                    if (objDificitRatesResponse.DS.Tables.Count > 2)
+                    {
+                        dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
+                    }
+                }
+
+
+                DataTable dtFSCRates = new DataTable();
+                DataTable dtFSCRatesfromDB = new DataTable();
+                DataTable tblFSCRatesFiltered = new DataTable();
+                string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
+                DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
+                {
+                    dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
+                }
+                else
+                {
+                    executionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                    executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                    executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                    executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                    // executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+                    // executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                    //string fromMail = objCommon.GetConfigValue("FromMailID");
+                    //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                    //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                    //string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
+                    //string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                    //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+                    executionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + ". Please update the fsc sheet with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+                    DataRow _newRow = dtMissingDieselPriceData.NewRow();
+                    _newRow["Original File Name"] = OriginlafileName;
+                    _newRow["Validating File Name"] = fileName;
+                    _newRow["Error"] = executionLogMessage;
+                    _newRow["Delivery Date"] = strFscRateDetailsfilepath;
+
+                    dtMissingDieselPriceData.Rows.Add(_newRow);
+
+                    dtMissingDieselPriceData.TableName = "Missing Diesel Pricing";
+                    string missingDieselPriceFileFolder = objCommon.GetConfigValue("MissingDieselPriceFileFolder");
+                    missingDieselPriceFlag = true;
+                    missingDieselPriceFilePath = objCommon.GetConfigValue("MissingDieselPriceFileFolder") + @"\" + dtMissingDieselPriceData.TableName + "-" + datetime + ".csv";
+                    objCommon.WriteDataToCsvFile(dtMissingDieselPriceData, missingDieselPriceFileFolder, "", datetime);
+
+                    objReturnResponse.ResponseVal = false;
+                    objReturnResponse.Reason = executionLogMessage;
+                    return objReturnResponse;
+                }
+
+
+
+                DataTable dtCarrierFSCRatesfromDB = new DataTable();
+                DataTable tblCarrierFSCRatesFiltered = new DataTable();
+
+                clsCommon.DSResponse objfscRatesResponse = new clsCommon.DSResponse();
+                objfscRatesResponse = objCommon.GetFSCRates_MappingDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                if (objfscRatesResponse.dsResp.ResponseVal)
+                {
+                    if (objfscRatesResponse.DS.Tables.Count > 0)
+                    {
+                        dtFSCRatesfromDB = objfscRatesResponse.DS.Tables[0];
+                    }
+                    if (objfscRatesResponse.DS.Tables.Count > 1)
+                    {
+                        dtCarrierFSCRatesfromDB = objfscRatesResponse.DS.Tables[1];
+                    }
+                }
+
+                DataTable dtBillingRates = new DataTable();
+                DataTable dtPayableRates = new DataTable();
+                clsCommon.DSResponse objBPRatesResponse = new clsCommon.DSResponse();
+                objBPRatesResponse = objCommon.GetBillingRatesAndPayableRates_CustomerMappingDetails(company_no.ToString(), customerNumber.ToString());
+                if (objBPRatesResponse.dsResp.ResponseVal)
+                {
+
+                    if (objBPRatesResponse.DS.Tables.Count > 0)
+                    {
+                        dtBillingRates = objBPRatesResponse.DS.Tables[0].Copy();
+                    }
+
+                    if (objBPRatesResponse.DS.Tables.Count > 1)
+                    {
+                        dtPayableRates = objBPRatesResponse.DS.Tables[1].Copy();
+                    }
+                }
+
+                foreach (DataRow dr in dtableOrderTemplateFinal.Rows)
+                {
+                    object value = dr["Delivery Date"];
+                    if (value == DBNull.Value)
+                        break;
+
+                    band = 0;
+                    int weight = Convert.ToInt32(dr["Weight"]);
+                    string bolNumber = (Convert.ToString(dr["BOL Number"]));
+
+                    string storenumber = Regex.Replace(bolNumber, @"\t", "");
+                    string deliveryName = Convert.ToString(dr["Customer Name"]);
+                    deliveryName = deliveryName.Replace("'", "");
+
+                    if (IsDigitsOnly(storenumber))
+                    {
+                        storenumber = Convert.ToString(Convert.ToInt32(storenumber));
+                    }
+
+                    DataTable dtstorebandsfiltered = new DataTable();
+
+                    IEnumerable<DataRow> storebandsfilteredRows = dtBBBStoreBands.AsEnumerable()
+                                                          .Where(row => row.Field<string>("Store") == storenumber && row.Field<string>("IsActive") == "Y");
+                    if (storebandsfilteredRows.Any())
+                    {
+                        dtstorebandsfiltered = storebandsfilteredRows.CopyToDataTable();
+                    }
+
+                    if (dtstorebandsfiltered.Rows.Count > 0)
+                    {
+                        band = Convert.ToInt16(dtstorebandsfiltered.Rows[0]["Band"]);
+
+                        //if (band == 0)
+                        //{
+                        //    dr["Pickup special instr long"] = "Band for store " + storenumber + " = 0";
+                        //    dr["status_code"] = "R";
+                        //}
+                    }
+                    else
+                    {
+                        executionLogMessage = "Band Details not found for this store number : " + storenumber + System.Environment.NewLine;
+                        executionLogMessage += "So not able to process this file, please update the Store Band details table with appropriate values." + System.Environment.NewLine;
+                        executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                        executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                        //executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+                        objCommon.WriteExecutionLog(executionLogMessage);
+
+                        //string fromMail = objCommon.GetConfigValue("FromMailID");
+                        //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        //string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
+                        //string subject = "Band Details not found for this store number : " + storenumber + " - Original file: " + OriginlafileName;
+                        //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+                        executionLogMessage = "Band Details not found for this store number : " + storenumber +". Please provide the updated Store Band details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+                        DataRow _newRow = dtBandDetailsMissingData.NewRow();
+                        _newRow["Original File Name"] = OriginlafileName;
+                        _newRow["Validating File Name"] = fileName;
+                        _newRow["Error"] = executionLogMessage;
+                        _newRow["Store Number"] = storenumber;
+                        dtBandDetailsMissingData.Rows.Add(_newRow);
+
+                        dtBandDetailsMissingData.TableName = "Band Details Missing";
+                        string bandDetailsMissingFileFolder = objCommon.GetConfigValue("BandDetailsMissingFileFolder");
+                        bandDetailsMissingFlag = true;
+                        bandDetailsMissingFilePath = objCommon.GetConfigValue("BandDetailsMissingFileFolder") + @"\" + dtBandDetailsMissingData.TableName + "-" + datetime + ".csv";
+                        objCommon.WriteDataToCsvFile(dtBandDetailsMissingData, bandDetailsMissingFileFolder, "", datetime);
+
+
+                        objReturnResponse.ResponseVal = false;
+                        objReturnResponse.Reason = executionLogMessage;
+                        return objReturnResponse;
+                        // throw new NullReferenceException("Band Details not found for this store number : " + storenumber + "- Original file: " + OriginlafileName);
+
+                    }
+
+                    DataTable dtDeficitWeightRatingfiltered = new DataTable();
+                    IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtBBBDificitWeightRating.AsEnumerable()
+                                                                              .Where(row => (row.Field<int>("Band") == band)
+                                                                              && (row.Field<int>("WeightFrom") <= weight)
+                                                                              && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+
+                    if (deficitWeightRatingfilteredRows.Any())
+                    {
+                        dtDeficitWeightRatingfiltered = deficitWeightRatingfilteredRows.CopyToDataTable();
+                    }
+
+                    if (dtDeficitWeightRatingfiltered.Rows.Count == 0)
+                    {
+                        //objReturnResponse.ResponseVal = false;
+                        //objReturnResponse.Reason = " Pricing Info missing for store" + storenumber;
+                        //return objReturnResponse;
+
+                        executionLogMessage = "Pricing Info missing for store number : " + storenumber + " - Band: " + band + System.Environment.NewLine;
+                        executionLogMessage += "So not able to process this file, please update the pricing details table with appropriate values." + System.Environment.NewLine;
+                        executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                        executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                        //executionLogMessage += "This email as marked, please mark as unread to reprocess process. " + System.Environment.NewLine;
+                        //executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+
+                        objCommon.WriteExecutionLog(executionLogMessage);
+
+                        //string fromMail = objCommon.GetConfigValue("FromMailID");
+                        //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        //string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
+                        //string subject = "Pricing Info missing for store number : " + storenumber + " - Original file: " + OriginlafileName;
+                        //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+
+                        executionLogMessage = "Pricing Info missing for store number : " + storenumber + " - Band: " + band + ".Please provide the updated pricing details to get this order processed. It is currently held back from going into Data Trac. ";
+
+                        DataRow _newRow = dtPricingInfoMissingData.NewRow();
+                        _newRow["Original File Name"] = OriginlafileName;
+                        _newRow["Validating File Name"] = fileName;
+                        _newRow["Error"] = executionLogMessage;
+                        _newRow["Store Number"] = storenumber;
+                        _newRow["Band"] = band;
+                        dtPricingInfoMissingData.Rows.Add(_newRow);
+
+                        dtPricingInfoMissingData.TableName = "Pricing Info Missing";
+                        string pricingInfoMissingFileFolder = objCommon.GetConfigValue("PricingInfoMissingFileFolder");
+                        pricingInfoMissingFlag = true;
+                        pricingInfoMissingFilePath = objCommon.GetConfigValue("PricingInfoMissingFileFolder") + @"\" + dtPricingInfoMissingData.TableName + "-" + datetime + ".csv";
+                        objCommon.WriteDataToCsvFile(dtPricingInfoMissingData, pricingInfoMissingFileFolder, "", datetime);
+
+
+                        objReturnResponse.ResponseVal = false;
+                        objReturnResponse.Reason = executionLogMessage;
+                        return objReturnResponse;
+                    }
+
+                    DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
+                    IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                              .Where(row => (row.Field<int>("Band") == band)
+                                                                              && (row.Field<int>("WeightFrom") <= weight)
+                                                                              && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+
+                    if (deficitWeightRatingPayablefilteredRows.Any())
+                    {
+                        dtDeficitWeightRatingPayablefiltered = deficitWeightRatingPayablefilteredRows.CopyToDataTable();
+                    }
+
+                    DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(value.ToString(), @"\t", ""));
+
+                    var invCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+                    DataTable tblBillRatesFiltered = new DataTable();
+                    IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")) && row.Field<string>("IsActive") == "Y");
+
+                    if (billratesfilteredRows.Any())
+                    {
+                        tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                    }
+
+                    DataTable tblPayableRatesFiltered = new DataTable();
+                    IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")) && row.Field<string>("IsActive") == "Y");
+
+
+                    if (payableratesfilteredRows.Any())
+                    {
+                        tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                    }
+
+                    DataTable tblFSCBillRatesFiltered = new DataTable();
+
+                    IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                    .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+                    && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                    if (fscbillratesfilteredRows.Any())
+                    {
+                        tblFSCBillRatesFiltered = fscbillratesfilteredRows.CopyToDataTable();
+
+                        decimal fuelcharge = 0;
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"])))
+                        {
+                            fuelcharge = Convert.ToDecimal(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"]));
+                        }
+                        else
+                        {
+                            executionLogMessage = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString() + System.Environment.NewLine;
+                            executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values." + System.Environment.NewLine;
+                            // executionLogMessage += "Found exception while Validating Validating Data for filename  -" + fileName + System.Environment.NewLine;
+                            // executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                            executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                            executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                            // executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+                            objCommon.WriteExecutionLog(executionLogMessage);
+
+                            //string fromMail = objCommon.GetConfigValue("FromMailID");
+                            //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                            //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                            //string toMail = objCommon.GetConfigValue("BBBSendExceptionEmail");
+                            //string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
+                            //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+                            executionLogMessage = "Diesel price is missing for date " + dtdeliveryDate.ToShortDateString() +". Please update the fsc sheet with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+
+                            DataRow _newRow = dtMissingDieselPriceData.NewRow();
+                            _newRow["Original File Name"] = OriginlafileName;
+                            _newRow["Validating File Name"] = fileName;
+                            _newRow["Error"] = executionLogMessage;
+                            _newRow["Delivery Date"] = dtdeliveryDate.ToShortDateString();
+                            dtMissingDieselPriceData.Rows.Add(_newRow);
+
+                            dtMissingDieselPriceData.TableName = "Missing Diesel Pricing";
+                            string missingDieselPriceFileFolder = objCommon.GetConfigValue("MissingDieselPriceFileFolder");
+                            missingDieselPriceFlag = true;
+                            missingDieselPriceFilePath = objCommon.GetConfigValue("MissingDieselPriceFileFolder") + @"\" + dtMissingDieselPriceData.TableName + "-" + datetime + ".csv";
+                            objCommon.WriteDataToCsvFile(dtMissingDieselPriceData, missingDieselPriceFileFolder, "", datetime);
+
+                            objReturnResponse.ResponseVal = false;
+                            objReturnResponse.Reason = executionLogMessage;
+                            return objReturnResponse;
+                            // throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
+                        }
+
+                        if (dtFSCRatesfromDB.Rows.Count > 0)
+                        {
+                            IEnumerable<DataRow> fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                            .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                             && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                            if (!fscratesfilteredRows.Any())
+                            {
+                                fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                             .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                              && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+
+                                if (!fscratesfilteredRows.Any())
+                                {
+                                    executionLogMessage = "FSC Billing Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                    executionLogMessage += "So not able to process this file, please update the billable rates mapping table with appropriate values";
+                                    // executionLogMessage += "Found exception while Validating Validating Data for filename  -" + fileName + System.Environment.NewLine;
+                                    // executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                                    executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                                    executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                                    //executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+
+                                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                                    //string fromMail = objCommon.GetConfigValue("FromMailID");
+                                    //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                    //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                    //string toMail = objCommon.GetConfigValue("ToMailID");
+                                    //string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                    //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+                                    executionLogMessage = "FSC Billing Rates missing for this fuel charge " + fuelcharge + ". Please update the billable rates details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+                                    DataRow _newRow = dtFSCInfoMissingData.NewRow();
+                                    _newRow["Original File Name"] = OriginlafileName;
+                                    _newRow["Validating File Name"] = fileName;
+                                    _newRow["Error"] = executionLogMessage;
+                                    _newRow["Store Number"] = storenumber;
+                                    _newRow["Band"] = band;
+                                    _newRow["Fuel Charge"] = fuelcharge;
+                                    dtFSCInfoMissingData.Rows.Add(_newRow);
+
+                                    dtFSCInfoMissingData.TableName = "FSC Info Missing";
+                                    string pricingInfoMissingFileFolder = objCommon.GetConfigValue("FSCInfoMissingFileFolder");
+                                    fscInfoMissingFlag = true;
+                                    fscInfoMissingFilePath = objCommon.GetConfigValue("FSCInfoMissingFileFolder") + @"\" + dtFSCInfoMissingData.TableName + "-" + datetime + ".csv";
+                                    objCommon.WriteDataToCsvFile(dtFSCInfoMissingData, pricingInfoMissingFileFolder, "", datetime);
+
+                                    objReturnResponse.ResponseVal = false;
+                                    objReturnResponse.Reason = executionLogMessage;
+                                    return objReturnResponse;
+                                }
+                            }
+                        }
+                        if (dtCarrierFSCRatesfromDB.Rows.Count > 0)
+                        {
+                            IEnumerable<DataRow> CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                            .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                            && (fuelcharge <= row.Field<decimal>("Stop"))
+                            && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                            if (!CarrierfscratesfilteredRows.Any())
+                            {
+                                CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                           .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                           && (fuelcharge <= row.Field<decimal>("Stop"))
+                           && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                                if (!CarrierfscratesfilteredRows.Any())
+                                {
+                                    executionLogMessage = "FSC Payable Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                    executionLogMessage += "So not able to process this file, please update the payable rates mapping table with appropriate values";
+                                    // executionLogMessage += "Found exception while Validating Validating Data for filename  -" + fileName + System.Environment.NewLine;
+                                    // executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                                    executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                                    executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+                                    //executionLogMessage += "This email is remain un marked" + System.Environment.NewLine;
+
+                                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                                    //string fromMail = objCommon.GetConfigValue("FromMailID");
+                                    //string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                    //string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                    //string toMail = objCommon.GetConfigValue("ToMailID");
+                                    //string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                    //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+
+                                    executionLogMessage = "FSC Payable Rates missing for this fuel charge " + fuelcharge + ". Please update the payable rates details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+                                    DataRow _newRow = dtFSCInfoMissingData.NewRow();
+                                    _newRow["Original File Name"] = OriginlafileName;
+                                    _newRow["Validating File Name"] = fileName;
+                                    _newRow["Error"] = executionLogMessage;
+                                    _newRow["Store Number"] = storenumber;
+                                    _newRow["Band"] = band;
+                                    _newRow["Fuel Charge"] = fuelcharge;
+                                    dtFSCInfoMissingData.Rows.Add(_newRow);
+
+                                    dtFSCInfoMissingData.TableName = "FSC Info Missing";
+                                    string pricingInfoMissingFileFolder = objCommon.GetConfigValue("FSCInfoMissingFileFolder");
+                                    fscInfoMissingFlag = true;
+                                    fscInfoMissingFilePath = objCommon.GetConfigValue("FSCInfoMissingFileFolder") + @"\" + dtFSCInfoMissingData.TableName + "-" + datetime + ".csv";
+                                    objCommon.WriteDataToCsvFile(dtFSCInfoMissingData, pricingInfoMissingFileFolder, "", datetime);
+
+
+                                    objReturnResponse.ResponseVal = false;
+                                    objReturnResponse.Reason = executionLogMessage;
+                                    return objReturnResponse;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                executionLogMessage = "Exception found for this file: " + fileName + System.Environment.NewLine;
+                // executionLogMessage = "Original file: " + OriginlafileName + System.Environment.NewLine;
+                executionLogMessage += "Validating Data for file Name : " + fileName + System.Environment.NewLine;
+                executionLogMessage += "Original file Name : " + OriginlafileName + System.Environment.NewLine;
+
+                executionLogMessage += ex.Message;
+                objCommon.WriteExecutionLog(executionLogMessage);
+                objCommon.WriteErrorLog(ex, "ValidateBBBDataForDEL");
+                string subject = "Found Exception while processing this file for Delivey, Please look into it immediately, File Name   : " + fileName;
+                objCommon.SendExceptionMail(subject, executionLogMessage);
+                objReturnResponse.ResponseVal = false;
+                objReturnResponse.Reason = executionLogMessage;
+            }
+            return objReturnResponse;
         }
 
         public static bool IsDigitsOnly(string str)
@@ -3174,7 +3902,7 @@ namespace JWLRetriveEmail
         }
         private static clsCommon.ReturnResponse GenerateOrderTemplate(ref DataTable dtableOrderTemplate, DataTable dtOrderData,
             string fileName, string customerName, string locationCode,
-            string productCode, string productSubCode)
+            string productCode, string productSubCode, string datetime)
         {
 
             clsCommon objCommon = new clsCommon();
@@ -3188,7 +3916,7 @@ namespace JWLRetriveEmail
             objDsRes = objCommon.GetOrderPostTemplateDetails(customerName, locationCode, productCode, productSubCode);
             if (objDsRes.dsResp.ResponseVal)
             {
-                string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                //  string strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
                 try
                 {
                     // DataTable dtOrderData = dsExcel.Tables[0];
@@ -3414,6 +4142,7 @@ namespace JWLRetriveEmail
                     //{
                     //    dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["Dimensions"])].ColumnName = "Dimensions";
                     //}
+
                     if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_number"])))
                     {
                         dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["item_number"])].ColumnName = "Item Number";
@@ -3446,6 +4175,42 @@ namespace JWLRetriveEmail
                     if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["deliver_attention"])))
                     {
                         dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["deliver_attention"])].ColumnName = "Deliver Attention";
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt1"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt1"])].ColumnName = "add_charge_amt1";
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code1"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code1"])].ColumnName = "add_charge_code1";
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt2"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt2"])].ColumnName = "add_charge_amt2";
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code2"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code2"])].ColumnName = "add_charge_code2";
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt3"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt3"])].ColumnName = "add_charge_amt3";
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code3"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code3"])].ColumnName = "add_charge_code3";
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt4"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_amt4"])].ColumnName = "add_charge_amt4";
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code4"])))
+                    {
+                        dtOrderData.Columns[Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code4"])].ColumnName = "add_charge_code4";
                     }
 
 
@@ -4394,6 +5159,324 @@ namespace JWLRetriveEmail
                             {
                                 _newRow["Deliver Attention"] = "";
                             }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt1"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt1"])))
+                                {
+                                    _newRow["add_charge_amt1"] = Convert.ToString(dr["add_charge_amt1"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt1"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt1"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code1"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code1"])))
+                                {
+                                    _newRow["add_charge_code1"] = Convert.ToString(dr["add_charge_code1"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code1"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code1"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt2"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt2"])))
+                                {
+                                    _newRow["add_charge_amt2"] = Convert.ToString(dr["add_charge_amt2"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt2"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt2"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code2"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code2"])))
+                                {
+                                    _newRow["add_charge_code2"] = Convert.ToString(dr["add_charge_code2"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code2"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code2"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt3"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt3"])))
+                                {
+                                    _newRow["add_charge_amt3"] = Convert.ToString(dr["add_charge_amt3"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt3"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt3"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code3"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code3"])))
+                                {
+                                    _newRow["add_charge_code3"] = Convert.ToString(dr["add_charge_code3"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code3"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code3"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt4"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt4"])))
+                                {
+                                    _newRow["add_charge_amt4"] = Convert.ToString(dr["add_charge_amt4"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt4"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt4"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code4"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code4"])))
+                                {
+                                    _newRow["add_charge_code4"] = Convert.ToString(dr["add_charge_code4"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code4"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code4"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt5"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt5"])))
+                                {
+                                    _newRow["add_charge_amt5"] = Convert.ToString(dr["add_charge_amt5"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt5"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt5"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code5"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code5"])))
+                                {
+                                    _newRow["add_charge_code5"] = Convert.ToString(dr["add_charge_code5"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code5"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code5"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_amt6"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt6"])))
+                                {
+                                    _newRow["add_charge_amt6"] = Convert.ToString(dr["add_charge_amt6"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_amt6"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_amt6"] = "";
+                            }
+
+                            if (dr.Table.Columns.Contains("add_charge_code6"))
+                            {
+                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code6"])))
+                                {
+                                    _newRow["add_charge_code6"] = Convert.ToString(dr["add_charge_code6"]);
+                                }
+                                else
+                                {
+                                    _newRow["add_charge_code6"] = "";
+                                }
+                            }
+                            else
+                            {
+                                _newRow["add_charge_code6"] = "";
+                            }
+
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code1_Value"])))
+                            {
+                                _newRow["add_charge_code1"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code1_Value"]);
+                            }
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code2_Value"])))
+                            {
+                                _newRow["add_charge_code2"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code2_Value"]);
+                            }
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code3_Value"])))
+                            {
+                                _newRow["add_charge_code3"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code3_Value"]);
+                            }
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code4_Value"])))
+                            {
+                                _newRow["add_charge_code4"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code4_Value"]);
+                            }
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code5_Value"])))
+                            {
+                                _newRow["add_charge_code5"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code5_Value"]);
+                            }
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code6_Value"])))
+                            {
+                                _newRow["add_charge_code6"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code6_Value"]);
+                            }
+
+                            if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
+                            {
+                                if (dr.Table.Columns.Contains("UnitCount"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["UnitCount"])))
+                                    {
+                                        _newRow["UnitCount"] = Convert.ToString(dr["UnitCount"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["UnitCount"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["UnitCount"] = "";
+                                }
+
+                                if (dr.Table.Columns.Contains("Actual Receive Date"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Actual Receive Date"])))
+                                    {
+                                        _newRow["Actual Receive Date"] = Convert.ToString(dr["Actual Receive Date"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["Actual Receive Date"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["Actual Receive Date"] = "";
+                                }
+
+                                if (dr.Table.Columns.Contains("Stairs"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Stairs"])))
+                                    {
+                                        _newRow["Stairs"] = Convert.ToString(dr["Stairs"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["Stairs"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["Stairs"] = "";
+                                }
+
+                                if (dr.Table.Columns.Contains("Manufacturer"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Manufacturer"])))
+                                    {
+                                        _newRow["Manufacturer"] = Convert.ToString(dr["Manufacturer"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["Manufacturer"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["Manufacturer"] = "";
+                                }
+
+                                if (dr.Table.Columns.Contains("Delivery Type"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Type"])))
+                                    {
+                                        _newRow["Delivery Type"] = Convert.ToString(dr["Delivery Type"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["Delivery Type"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["Delivery Type"] = "";
+                                }
+
+
+                                if (dr.Table.Columns.Contains("Men"))
+                                {
+                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Men"])))
+                                    {
+                                        _newRow["Men"] = Convert.ToString(dr["Men"]);
+                                    }
+                                    else
+                                    {
+                                        _newRow["Men"] = "";
+                                    }
+                                }
+                                else
+                                {
+                                    _newRow["Men"] = "";
+                                }
+                            }
+
                             dtableOrderTemplate.Rows.Add(_newRow);
                         }
                     }
@@ -4413,13 +5496,1475 @@ namespace JWLRetriveEmail
                     string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
                     DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                     dsFailureResponse.Tables[0].TableName = "Order-Create-Input";
-                    objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0], fileName, strDatetime);
+                    objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0], fileName, datetime);
 
                 }
 
                 dtableOrderTemplate.TableName = "Template";
 
             }
+            return returnResponse;
+        }
+
+        private static clsCommon.ReturnResponse GenerateCDSOrderTemplate(ref DataTable dtableOrderTemplateFinal, DataTable dtBillingRates, DataTable dtPayableRates,
+         DataTable dtCDSBadData, DataTable dtCDSMissingConfigData, string company_no, string customerNumber, string fileName, string dateTime, string customerrefmappingcolumnname)
+        {
+
+            clsCommon objCommon = new clsCommon();
+
+            clsCommon.ReturnResponse returnResponse = new clsCommon.ReturnResponse();
+            string executionLogMessage = string.Empty;
+            DataTable dtFSCRates = new DataTable();
+            DataTable dtFSCRatesfromDB = new DataTable();
+            DataTable tblFSCRatesFiltered = new DataTable();
+            string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
+            DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+            if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
+            {
+                dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
+            }
+            else
+            {
+                executionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                objCommon.WriteExecutionLog(executionLogMessage);
+
+                string fromMail = objCommon.GetConfigValue("FromMailID");
+                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+            }
+
+            DataTable dtCarrierFSCRatesfromDB = new DataTable();
+            DataTable tblCarrierFSCRatesFiltered = new DataTable();
+
+
+
+            clsCommon.DSResponse objfscRatesResponse = new clsCommon.DSResponse();
+            objfscRatesResponse = objCommon.GetFSCRates_MappingDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+            if (objfscRatesResponse.dsResp.ResponseVal)
+            {
+                if (objfscRatesResponse.DS.Tables.Count > 0)
+                {
+                    dtFSCRatesfromDB = objfscRatesResponse.DS.Tables[0];
+                }
+                if (objfscRatesResponse.DS.Tables.Count > 1)
+                {
+                    dtCarrierFSCRatesfromDB = objfscRatesResponse.DS.Tables[1];
+                }
+            }
+
+            var itemsToDelete = new List<DataRow>();
+
+            DataTable dtBadData = new DataTable();
+            dtBadData.Clear();
+            dtBadData.Columns.Add("Customer Reference");
+
+            DataTable dtMissingConfData = new DataTable();
+            dtMissingConfData.Clear();
+            dtMissingConfData.Columns.Add("Customer Reference");
+
+            foreach (DataRow dr in dtableOrderTemplateFinal.Rows)
+            {
+                string deliveryType = string.Empty;
+                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Type"])))
+                {
+                    deliveryType = Convert.ToString(dr["Delivery Type"]);
+                }
+
+                object delivertyDate = dr["Delivery Date"];
+                object receivedDate;
+
+                if (deliveryType != null && deliveryType.ToUpper() == "RETURN")
+                    receivedDate = dr["Delivery Date"];
+                else
+                    receivedDate = dr["Actual Receive Date"];
+
+
+                if (delivertyDate == DBNull.Value || receivedDate == DBNull.Value)
+                    break;
+
+                DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(delivertyDate.ToString(), @"\t", ""));
+                DateTime dtreceivedDate = Convert.ToDateTime(Regex.Replace(receivedDate.ToString(), @"\t", ""));
+
+
+                //    int diffDays = Convert.ToInt32((dtreceivedDate - dtdeliveryDate).TotalDays);
+                int diffDays = Convert.ToInt32((dtdeliveryDate - dtreceivedDate).TotalDays);
+                //if (deliveryType != null && deliveryType.ToUpper() == "RETURN")
+                //{
+                //    diffDays = 0;
+                //}
+
+                var invCulture = System.Globalization.CultureInfo.InvariantCulture;
+                //string deliveryName = Convert.ToString(dr["Customer Name"]);
+                string deliveryName = Convert.ToString(dr["Manufacturer"]);
+
+
+                //if ((!string.IsNullOrEmpty(Convert.ToString(dr["Pieces"]))) && (!string.IsNullOrEmpty(Convert.ToString(dr["UnitCount"]))))
+                //{
+                //    if (Convert.ToInt32(dr["Pieces"]) == 0 && Convert.ToInt32(dr["UnitCount"]) > 0)
+                //    {
+                //        deliveryName = "Millwork";
+                //    }
+                //}
+
+                if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                {
+                    dr["Pieces"] = 0;
+                }
+                if (string.IsNullOrEmpty(Convert.ToString(dr["UnitCount"])))
+                {
+                    dr["UnitCount"] = 0;
+                }
+
+
+                if (Convert.ToInt32(dr["Pieces"]) > 0 && Convert.ToInt32(dr["UnitCount"]) > 0)
+                {
+                    // write the details into event and continue
+
+                    // DataTable dtBadData = new DataTable();
+                    // dtBadData = dtableOrderTemplateFinal.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+                    DataRow _newRow = dtBadData.NewRow();
+                    _newRow["Customer Reference"] = dr["Customer Reference"];
+                    dtBadData.Rows.Add(_newRow);
+
+                    //dtBadData.TableName = "BadData";
+                    //string badDataFilePath = objCommon.GetConfigValue("BadDataFileFolder");
+                    //objCommon.WriteDataToCsvFile(dtBadData, badDataFilePath, fileName, dateTime);
+
+                    executionLogMessage = "CDS Order Template File Generation Error " + System.Environment.NewLine;
+                    executionLogMessage += "Cabinet Count and Unit Count found greater than 0 for this record" + System.Environment.NewLine; ;
+                    executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
+                    executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
+                    executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
+                    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+
+                    executionLogMessage += System.Environment.NewLine + "Please note, we have not processed this record.";
+
+                    objCommon.WriteExecutionLog(executionLogMessage);
+                    string fromMail = objCommon.GetConfigValue("FromMailID");
+                    string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                    string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                    string toMail = objCommon.GetConfigValue("ToMailID");
+                    string subject = "Cabinet Count and Unit Count found greater than 0 for this record, in file -" + fileName;
+                    objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                    //dr.Delete();
+                    itemsToDelete.Add(dr);
+                    continue;
+                }
+
+                if (Convert.ToInt32(dr["Pieces"]) == 0 && Convert.ToInt32(dr["UnitCount"]) > 0)
+                {
+                    deliveryName = "Millwork";
+                }
+
+                deliveryName = deliveryName.Replace("'", "");
+
+                int pieceunitcount = 0;
+                if (Convert.ToInt32(dr["Pieces"]) > 0)
+                {
+                    pieceunitcount = Convert.ToInt32(dr["Pieces"]);
+                }
+                else if (Convert.ToInt32(dr["UnitCount"]) > 0)
+                {
+                    pieceunitcount = Convert.ToInt32(dr["UnitCount"]);
+                }
+
+                DataTable tblBillRatesFiltered = new DataTable();
+
+                IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
+                .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
+                         && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                if (billratesfilteredRows.Any())
+                {
+                    tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                }
+                else
+                {
+                    billratesfilteredRows = dtBillingRates.AsEnumerable()
+             .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
+             && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+
+                    if (billratesfilteredRows.Any())
+                    {
+                        tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                    }
+                    else
+                    {
+                        //DataTable dtMissingConfData = new DataTable();
+                        //dtMissingConfData = dtableOrderTemplateFinal.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+
+                        DataRow _newRow = dtMissingConfData.NewRow();
+                        _newRow["Customer Reference"] = dr["Customer Reference"];
+                        dtMissingConfData.Rows.Add(_newRow);
+                        //dtMissingConfData.TableName = "MissingConf";
+                        //string missingConfFilePath = objCommon.GetConfigValue("MissingConfFileFolder");
+                        //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
+
+                        executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
+                        executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                        executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
+                        executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
+                        executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
+                        executionLogMessage += "Manufacturer -" + deliveryName + System.Environment.NewLine;
+                        executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                        executionLogMessage += System.Environment.NewLine + "Please note, we have not processed this record.";
+
+                        objCommon.WriteExecutionLog(executionLogMessage);
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("ToMailID");
+                        string subject = "Missing Configuration for this record in file - " + fileName;
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                        itemsToDelete.Add(dr);
+                        //  dr.Delete();
+                        continue;
+                    }
+                }
+
+                DataTable tblPayableRatesFiltered = new DataTable();
+                IEnumerable<DataRow> payableratesfilteredRows;
+
+                if (deliveryName != "Millwork")
+                {
+                    deliveryName = string.Empty;
+                }
+
+                if (deliveryType != null && deliveryType.ToUpper() != "WILL")
+                {
+                    if (deliveryName == "Millwork")
+                    {
+                        payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                       .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
+                       && (row.Field<string>("DeliveryName") == deliveryName)
+                       && (row.Field<decimal>("minimumcount") <= pieceunitcount) && (pieceunitcount <= row.Field<decimal>("maximumcount")) && row.Field<string>("IsActive") == "Y");
+
+                        if (payableratesfilteredRows.Any())
+                        {
+                            tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                        }
+                        else
+                        {
+                            // No configuration found 
+
+                            // need to copy the record into csv 
+
+                            //DataTable dtMissingConfData = new DataTable();
+                            //dtMissingConfData = dtableOrderTemplateFinal.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+
+                            DataRow _newRow = dtMissingConfData.NewRow();
+                            _newRow["Customer Reference"] = dr["Customer Reference"];
+                            dtMissingConfData.Rows.Add(_newRow);
+                            //dtMissingConfData.TableName = "MissingConf";
+                            //string missingConfFilePath = objCommon.GetConfigValue("MissingConfFileFolder");
+                            //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
+
+                            executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
+                            executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                            executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
+                            executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
+                            executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
+                            executionLogMessage += "Manufacturer -" + deliveryName + System.Environment.NewLine;
+                            executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                            executionLogMessage += System.Environment.NewLine + "Please note, we have not processed this record.";
+
+                            objCommon.WriteExecutionLog(executionLogMessage);
+                            string fromMail = objCommon.GetConfigValue("FromMailID");
+                            string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                            string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                            string toMail = objCommon.GetConfigValue("ToMailID");
+                            string subject = "Missing Configuration for this record in file - " + fileName;
+                            objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                            itemsToDelete.Add(dr);
+                            //  dr.Delete();
+                            continue;
+
+                        }
+                    }
+                    else
+                    {
+                        //  DataTable tblPayableRatesFiltered = new DataTable();
+                        //  IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
+
+                        payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
+                        && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                        if (payableratesfilteredRows.Any())
+                        {
+                            tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                        }
+                        else
+                        {
+                            payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
+                        && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+
+                            if (payableratesfilteredRows.Any())
+                            {
+                                tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                            }
+                            else
+                            {
+                                // No configuration found 
+                                // need to copy the record into csv 
+                                //DataTable dtMissingConfData = new DataTable();
+                                //dtMissingConfData = dtableOrderTemplateFinal.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
+
+                                DataRow _newRow = dtMissingConfData.NewRow();
+                                _newRow["Customer Reference"] = dr["Customer Reference"];
+                                dtMissingConfData.Rows.Add(_newRow);
+                                //dtMissingConfData.TableName = "MissingConf";
+                                //string missingConfFilePath = objCommon.GetConfigValue("MissingConfFileFolder");
+                                //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
+
+                                executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
+                                executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                                executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
+                                executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
+                                executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
+                                executionLogMessage += "Manufacturer -" + deliveryName + System.Environment.NewLine;
+                                executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                executionLogMessage += System.Environment.NewLine + "Please note, we have not processed this record.";
+
+                                objCommon.WriteExecutionLog(executionLogMessage);
+                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string subject = "Missing Configuration for this record in file - " + fileName;
+                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                                itemsToDelete.Add(dr);
+                                //  dr.Delete();
+                                continue;
+
+                            }
+                        }
+                    }
+                }
+
+
+                DataTable tblFSCBillRatesFiltered = new DataTable();
+                double fscratePercentage = 0;
+                double carrierfscratePercentage = 0;
+
+                string fscratetype = string.Empty;
+                string carrierfscratetype = string.Empty;
+
+
+                IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+        && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                if (fscbillratesfilteredRows.Any())
+                {
+                    tblFSCBillRatesFiltered = fscbillratesfilteredRows.CopyToDataTable();
+
+                    decimal fuelcharge = 0;
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"])))
+                    {
+                        fuelcharge = Convert.ToDecimal(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"]));
+                    }
+                    else
+                    {
+                        executionLogMessage = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString() + System.Environment.NewLine;
+                        executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values." + System.Environment.NewLine;
+                        executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                        objCommon.WriteExecutionLog(executionLogMessage);
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                        string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                        throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
+                    }
+
+                    if (dtFSCRatesfromDB.Rows.Count > 0)
+                    {
+                        IEnumerable<DataRow> fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                        .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                         && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                        if (fscratesfilteredRows.Any())
+                        {
+                            tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                            fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                            fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                        }
+                        else
+                        {
+
+                            fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                           .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                            && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                            if (fscratesfilteredRows.Any())
+                            {
+                                tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                                fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                            }
+                            else
+                            {
+                                executionLogMessage = "FSC Billing Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                executionLogMessage += "So not able to process this file, please update the billable rates mapping table with appropriate values";
+                                executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                objCommon.WriteExecutionLog(executionLogMessage);
+                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                                throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
+                            }
+                        }
+                    }
+                    if (dtCarrierFSCRatesfromDB.Rows.Count > 0)
+                    {
+                        IEnumerable<DataRow> CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                        .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                        && (fuelcharge <= row.Field<decimal>("Stop"))
+                        && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                        if (CarrierfscratesfilteredRows.Any())
+                        {
+                            tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                            carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                            carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                        }
+                        else
+                        {
+                            CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                        .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                        && (fuelcharge <= row.Field<decimal>("Stop"))
+                        && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                            if (CarrierfscratesfilteredRows.Any())
+                            {
+                                tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                                carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                            }
+                            else
+                            {
+                                executionLogMessage = "FSC Payable Rates missing for this fuel charge   " + fuelcharge + System.Environment.NewLine;
+                                executionLogMessage += "So not able to process this file, please update the payable rates mapping table with appropriate values";
+                                executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                objCommon.WriteExecutionLog(executionLogMessage);
+                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
+                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                                throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
+                            }
+                        }
+                    }
+                }
+
+                const double daysToMonths = 30.4368499;
+
+                if (tblBillRatesFiltered.Rows.Count > 0)
+                {
+                    double billRate = 0;
+                    double minimumRate = 0;
+                    double parts_only_charge = 0;
+                    string storage_charge_type = string.Empty;
+                    string storage_charge_unit = string.Empty;
+                    int storage_charge_minimum_days = 0;
+                    string stair_charge_type = string.Empty;
+                    int stair_number_of_minimum_flights = 0;
+                    int numberofStairs = 0;
+
+                    int numberofdiffDays = 0;
+                    double totalStorageCharge = 0;
+                    double totalStaireCharge = 0;
+                    int numberofflight = 0;
+                    double maximum_miles = 0;
+                    double mileage_charge_rate = 0;
+                    double maximum_men = 0;
+                    double extra_man_fees = 0;
+                    string will_call_type = string.Empty;
+                    double will_call_charge = 0;
+                    int miles = 0;
+                    int men = 0;
+                    double totalMilesCharge = 0;
+                    double totalExtraManFee = 0;
+
+
+                    double add_charge_amt1 = 0;
+                    double add_charge_amt2 = 0;
+
+                    double minimumCount = 0;
+
+                    string return_rate_type = string.Empty;
+                    double return_rate = 0;
+
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["minimum_rate"])))
+                    {
+                        minimumRate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["minimum_rate"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["minimumcount"])))
+                    {
+                        minimumCount = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["minimumcount"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["parts_only_charge"])))
+                    {
+                        parts_only_charge = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["parts_only_charge"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["storage_charge_type"])))
+                    {
+                        storage_charge_type = Convert.ToString(tblBillRatesFiltered.Rows[0]["storage_charge_type"]); ;
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["storage_charge_unit"])))
+                    {
+                        storage_charge_unit = Convert.ToString(tblBillRatesFiltered.Rows[0]["storage_charge_unit"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["storage_charge_minimum_days"])))
+                    {
+                        storage_charge_minimum_days = Convert.ToInt32(tblBillRatesFiltered.Rows[0]["storage_charge_minimum_days"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["stair_charge_type"])))
+                    {
+                        stair_charge_type = Convert.ToString(tblBillRatesFiltered.Rows[0]["stair_charge_type"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["stair_number_of_minimum_flights"])))
+                    {
+                        stair_number_of_minimum_flights = Convert.ToInt32(tblBillRatesFiltered.Rows[0]["stair_number_of_minimum_flights"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["add_charge_amt1"])))
+                    {
+                        add_charge_amt1 = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["add_charge_amt1"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["add_charge_amt2"])))
+                    {
+                        add_charge_amt2 = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["add_charge_amt2"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Stairs"])))
+                    {
+                        numberofStairs = Convert.ToInt32(dr["Stairs"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["maximum_miles"])))
+                    {
+                        maximum_miles = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["maximum_miles"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["mileage_charge_rate"])))
+                    {
+                        mileage_charge_rate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["mileage_charge_rate"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["maximum_men"])))
+                    {
+                        maximum_men = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["maximum_men"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["extra_man_fees"])))
+                    {
+                        extra_man_fees = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["extra_man_fees"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["will_call_type"])))
+                    {
+                        will_call_type = Convert.ToString(tblBillRatesFiltered.Rows[0]["will_call_type"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["will_call_charge"])))
+                    {
+                        will_call_charge = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["will_call_charge"]);
+                    }
+
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["return_rate_type"])))
+                    {
+                        return_rate_type = Convert.ToString(tblBillRatesFiltered.Rows[0]["return_rate_type"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["return_rate"])))
+                    {
+                        return_rate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["return_rate"]);
+                    }
+
+
+                    if (diffDays > storage_charge_minimum_days)
+                    {
+                        numberofdiffDays = diffDays - storage_charge_minimum_days;
+                    }
+
+                    if (numberofStairs > stair_number_of_minimum_flights)
+                    {
+                        numberofflight = numberofStairs - stair_number_of_minimum_flights;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                    {
+                        miles = Convert.ToInt32(dr["Miles"]);
+                        if (miles < 0)
+                        {
+                            dr["Miles"] = 0;
+                            miles = 0;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Men"])))
+                    {
+                        men = Convert.ToInt32(dr["Men"]);
+                    }
+
+                    if (miles > maximum_miles)
+                    {
+                        miles = miles - Convert.ToInt32(maximum_miles);
+
+                        totalMilesCharge = Math.Round(Convert.ToDouble(miles * mileage_charge_rate), 2);
+
+                    }
+
+                    if (men > maximum_men)
+                    {
+                        men = men - Convert.ToInt32(maximum_men);
+
+                        totalExtraManFee = Math.Round(Convert.ToDouble(men * extra_man_fees), 2);
+                    }
+
+
+                    if (Convert.ToInt32(dr["Pieces"]) == 0 && Convert.ToInt32(dr["UnitCount"]) == 0)
+                    {
+                        billRate = parts_only_charge;
+                        dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
+                        {
+                            if (pieceunitcount < minimumCount)
+                            {
+                                billRate = minimumRate;
+                            }
+                            else
+                            {
+                                billRate = minimumRate + (Convert.ToDouble(pieceunitcount - minimumCount) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]));
+                            }
+                            //billRate = Convert.ToDouble(pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]));
+                            //if (billRate < minimumRate)
+                            //{
+                            //    billRate = minimumRate;
+                            //}
+                            dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+
+                            // need to implement a minimum count column logic
+                        }
+                        // Calcuation of Total Storage Amount
+                        if (storage_charge_type.ToUpper() == "CABINET")
+                        {
+                            if (storage_charge_unit.ToUpper() == "DAY")
+                            {
+                                totalStorageCharge = numberofdiffDays * add_charge_amt2 * Convert.ToDouble(pieceunitcount);
+                            }
+                            else if (storage_charge_unit.ToUpper() == "MONTH")
+                            {
+                                // var totalMonths = Math.Round((numberofdiffDays % 365) / 30);
+                                var totalMonths = Convert.ToDouble(Math.Round(Convert.ToDouble(numberofdiffDays / daysToMonths)));
+                                // var totalMonths = Convert.ToDouble(Math.Round(Convert.ToDouble((numberofdiffDays % 365) / 30)));
+                                totalStorageCharge = totalMonths * add_charge_amt2 * Convert.ToDouble(pieceunitcount);
+                            }
+                        }
+                        else if (storage_charge_type.ToUpper() == "ORDER")
+                        {
+                            // totalStorageCharge = numberofdiffDays * rate_buck_amt2 * 1;
+                            if (storage_charge_unit.ToUpper() == "DAY")
+                            {
+                                totalStorageCharge = numberofdiffDays * add_charge_amt2 * 1;
+                            }
+                            else if (storage_charge_unit.ToUpper() == "MONTH")
+                            {
+                                var totalMonths = Convert.ToDouble(Math.Round(Convert.ToDouble(numberofdiffDays / daysToMonths)));
+                                totalStorageCharge = totalMonths * add_charge_amt2 * 1;
+                            }
+                        }
+
+                        // Calcuation of Total Stair Charge
+                        if (stair_charge_type.ToUpper() == "CABINET")
+                        {
+                            totalStaireCharge = numberofflight * add_charge_amt1 * Convert.ToDouble(pieceunitcount);
+                        }
+                        else if (stair_charge_type.ToUpper() == "ORDER")
+                        {
+                            totalStaireCharge = numberofflight * add_charge_amt1 * 1;
+                        }
+
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
+                    {
+                        if (fscratetype.ToString().ToUpper() == "F")
+                        {
+                            dr["FSC"] = Math.Round(Convert.ToDouble(fscratePercentage), 2);
+                        }
+                        else
+                        {
+                            dr["FSC"] = Math.Round(Convert.ToDouble(billRate * fscratePercentage) / 100, 2);
+                        }
+                    }
+
+                    if (deliveryType != null)
+                    {
+                        if (deliveryType.ToUpper() == "WILL")
+                        {
+                            dr["Correct Driver Number"] = objCommon.GetConfigValue("CDSCorrectDriverNumberforWill");
+
+                            if (!string.IsNullOrEmpty(Convert.ToString(will_call_charge)))
+                            {
+                                if (will_call_type.ToString().ToUpper() == "F")
+                                {
+                                    billRate = will_call_charge;
+                                }
+                                else
+                                {
+                                    billRate = Math.Round(Convert.ToDouble(billRate * will_call_charge) / 100, 2);
+                                }
+                                dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+                                //  totalStorageCharge = 0;
+                                totalStaireCharge = 0;
+                                totalMilesCharge = 0;
+                                totalExtraManFee = 0;
+                                dr["FSC"] = 0;
+                            }
+                        }
+                        else if (deliveryType.ToUpper() == "RETURN")
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(return_rate)))
+                            {
+                                if (return_rate_type.ToString().ToUpper() == "F")
+                                {
+                                    billRate = return_rate;
+                                }
+                                else
+                                {
+                                    billRate = Math.Round(Convert.ToDouble(billRate * return_rate) / 100, 2);
+                                }
+                                dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+                                totalStorageCharge = 0;
+                                //totalStaireCharge = 0;
+                                //totalMilesCharge = 0;
+                                //totalExtraManFee = 0;
+                                //dr["FSC"] = 0;
+                            }
+                        }
+                    }
+
+
+
+                    //dr["rate_buck_amt2"] = totalStorageCharge;
+                    //dr["Pieces ACC"] = totalStaireCharge;
+                    //dr["Miles"] = Convert.ToInt32(totalMilesCharge);
+                    //dr["rate_buck_amt4"] = (totalExtraManFee);
+
+                    dr["add_charge_amt1"] = totalStaireCharge;
+                    dr["add_charge_amt2"] = totalStorageCharge;
+                    dr["add_charge_amt3"] = Convert.ToInt32(totalMilesCharge);
+                    dr["add_charge_amt4"] = totalExtraManFee;
+
+                    if (pieceunitcount > 0)
+                    {
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                            dr["rate_buck_amt2"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                            dr["rate_buck_amt4"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                            dr["rate_buck_amt5"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                            dr["rate_buck_amt6"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                            dr["rate_buck_amt7"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                            dr["rate_buck_amt8"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                            dr["rate_buck_amt9"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                            dr["rate_buck_amt11"] = pieceunitcount * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                            dr["rate_buck_amt2"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
+                            dr["Pieces ACC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                            dr["rate_buck_amt4"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                            dr["rate_buck_amt5"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                            dr["rate_buck_amt6"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                            dr["rate_buck_amt7"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                            dr["rate_buck_amt8"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                            dr["rate_buck_amt9"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                            dr["rate_buck_amt11"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                    }
+
+                }
+
+                if (tblPayableRatesFiltered.Rows.Count > 0)
+                {
+
+                    double carrierBasePay = 0;
+                    double minimumRate = 0;
+                    double parts_only_charge = 0;
+                    //string storage_charge_type = string.Empty;
+                    //string storage_charge_unit = string.Empty;
+                    //int storage_charge_minimum_days = 0;
+                    string stair_charge_type = string.Empty;
+                    int stair_number_of_minimum_flights = 0;
+                    int numberofStairs = 0;
+                    //double charge1 = 0;
+                    //double charge2 = 0;
+                    //double charge3 = 0;
+
+                    // int numberofdiffDays = 0;
+                    // double totalStorageCharge = 0;
+                    double totalStaireCharge = 0;
+                    int numberofflight = 0;
+                    double maximum_miles = 0;
+                    double mileage_charge_rate = 0;
+                    double maximum_men = 0;
+                    double extra_man_fees = 0;
+                    string will_call_type = string.Empty;
+                    double will_call_charge = 0;
+                    int miles = 0;
+                    int men = 0;
+                    double totalMilesCharge = 0;
+                    double totalExtraManFee = 0;
+                    //  string deliveryType = string.Empty;
+
+                    double add_charge_amt1 = 0;
+                    double add_charge_amt2 = 0;
+
+                    string return_rate_type = string.Empty;
+                    double return_rate = 0;
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["minimum_rate"])))
+                    {
+                        minimumRate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["minimum_rate"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["parts_only_charge"])))
+                    {
+                        parts_only_charge = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["parts_only_charge"]); ;
+                    }
+
+                    //if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["storage_charge_type"])))
+                    //{
+                    //    storage_charge_type = Convert.ToString(tblPayableRatesFiltered.Rows[0]["storage_charge_type"]); ;
+                    //}
+                    //if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["storage_charge_unit"])))
+                    //{
+                    //    storage_charge_unit = Convert.ToString(tblPayableRatesFiltered.Rows[0]["storage_charge_unit"]); ;
+                    //}
+
+                    //if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["storage_charge_minimum_days"])))
+                    //{
+                    //    storage_charge_minimum_days = Convert.ToInt32(tblPayableRatesFiltered.Rows[0]["storage_charge_minimum_days"]); ;
+                    //}
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["stair_charge_type"])))
+                    {
+                        stair_charge_type = Convert.ToString(tblPayableRatesFiltered.Rows[0]["stair_charge_type"]); ;
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["stair_number_of_minimum_flights"])))
+                    {
+                        stair_number_of_minimum_flights = Convert.ToInt32(tblPayableRatesFiltered.Rows[0]["stair_number_of_minimum_flights"]); ;
+                    }
+
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["add_charge_amt1"])))
+                    {
+                        add_charge_amt1 = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["add_charge_amt1"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["add_charge_amt2"])))
+                    {
+                        add_charge_amt2 = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["add_charge_amt2"]);
+                    }
+
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Stairs"])))
+                    {
+                        numberofStairs = Convert.ToInt32(dr["Stairs"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["maximum_miles"])))
+                    {
+                        maximum_miles = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["maximum_miles"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["mileage_charge_rate"])))
+                    {
+                        mileage_charge_rate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["mileage_charge_rate"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["maximum_men"])))
+                    {
+                        maximum_men = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["maximum_men"]);
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["extra_man_fees"])))
+                    {
+                        extra_man_fees = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["extra_man_fees"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["will_call_type"])))
+                    {
+                        will_call_type = Convert.ToString(tblPayableRatesFiltered.Rows[0]["will_call_type"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["will_call_charge"])))
+                    {
+                        will_call_charge = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["will_call_charge"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["return_rate_type"])))
+                    {
+                        return_rate_type = Convert.ToString(tblPayableRatesFiltered.Rows[0]["return_rate_type"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["return_rate"])))
+                    {
+                        return_rate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["return_rate"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Type"])))
+                    {
+                        deliveryType = Convert.ToString(dr["Delivery Type"]);
+                    }
+
+
+                    //if (diffDays > storage_charge_minimum_days)
+                    //{
+                    //    numberofdiffDays = diffDays - storage_charge_minimum_days;
+                    //}
+
+                    if (numberofStairs > stair_number_of_minimum_flights)
+                    {
+                        numberofflight = numberofStairs - stair_number_of_minimum_flights;
+                    }
+
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                    {
+                        miles = Convert.ToInt32(dr["Miles"]);
+                    }
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Men"])))
+                    {
+                        men = Convert.ToInt32(dr["Men"]);
+                    }
+
+                    if (miles > maximum_miles)
+                    {
+                        miles = miles - Convert.ToInt32(maximum_miles);
+
+                        totalMilesCharge = Math.Round(Convert.ToDouble(miles * mileage_charge_rate), 2);
+
+                    }
+
+                    if (men > maximum_men)
+                    {
+                        men = men - Convert.ToInt32(maximum_men);
+
+                        totalExtraManFee = Math.Round(Convert.ToDouble(men * extra_man_fees), 2);
+                    }
+
+                    if (Convert.ToInt32(dr["Pieces"]) == 0 && Convert.ToInt32(dr["UnitCount"]) == 0)
+                    {
+                        carrierBasePay = parts_only_charge;
+                        dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                    }
+                    else
+                    {
+
+                        if (deliveryName == "Millwork")
+                        {
+                            //carrierBasePay = Convert.ToDouble(Convert.ToDouble(pieceunitcount) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]));
+                            carrierBasePay = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                            if (carrierBasePay < minimumRate)
+                            {
+                                carrierBasePay = minimumRate;
+                            }
+                            dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                            {
+                                carrierBasePay = Convert.ToDouble(Convert.ToDouble(pieceunitcount) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]));
+                                if (carrierBasePay < minimumRate)
+                                {
+                                    carrierBasePay = minimumRate;
+                                }
+                                dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                            }
+
+                        }
+
+                        //if (storage_charge_type.ToUpper() == "CABINET")
+                        //{
+                        //    if (storage_charge_unit.ToUpper() == "DAY")
+                        //    {
+                        //        totalStorageCharge = numberofdiffDays * add_charge_amt2 * Convert.ToDouble(pieceunitcount);
+                        //    }
+                        //    else if (storage_charge_unit.ToUpper() == "MONTH")
+                        //    {
+                        //        var totalMonths = Convert.ToDouble(Math.Round(Convert.ToDouble(numberofdiffDays / daysToMonths)));
+                        //        totalStorageCharge = totalMonths * add_charge_amt2 * Convert.ToDouble(pieceunitcount);
+                        //    }
+
+                        //}
+                        //else if (storage_charge_type.ToUpper() == "ORDER")
+                        //{
+                        //    // totalStorageCharge = numberofdiffDays * rate_buck_amt2 * 1;
+                        //    if (storage_charge_unit.ToUpper() == "DAY")
+                        //    {
+                        //        totalStorageCharge = numberofdiffDays * add_charge_amt2 * 1;
+                        //    }
+                        //    else if (storage_charge_unit.ToUpper() == "MONTH")
+                        //    {
+                        //        var totalMonths = Convert.ToDouble(Math.Round(Convert.ToDouble(numberofdiffDays / daysToMonths)));
+                        //        totalStorageCharge = totalMonths * add_charge_amt2 * 1;
+                        //    }
+                        //}
+
+                        // Calcuation of Total Stair Charge
+                        if (stair_charge_type.ToUpper() == "CABINET")
+                        {
+                            totalStaireCharge = numberofflight * add_charge_amt1 * Convert.ToDouble(pieceunitcount);
+                        }
+                        else if (stair_charge_type.ToUpper() == "ORDER")
+                        {
+                            totalStaireCharge = numberofflight * add_charge_amt1 * 1;
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                    {
+                        if (fscratetype.ToString().ToUpper() == "F")
+                        {
+                            dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                        }
+                        else
+                        {
+                            dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierBasePay * carrierfscratePercentage) / 100, 2);
+                        }
+                    }
+
+                    if (deliveryType != null)
+                    {
+                        if (deliveryType.ToUpper() == "WILL")
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(will_call_charge)))
+                            {
+                                if (will_call_type.ToString().ToUpper() == "F")
+                                {
+                                    carrierBasePay = will_call_charge;
+                                }
+                                else
+                                {
+                                    carrierBasePay = Math.Round(Convert.ToDouble(carrierBasePay * will_call_charge) / 100, 2);
+                                }
+                                dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                                // totalStorageCharge = 0;
+                                totalStaireCharge = 0;
+                                totalMilesCharge = 0;
+                                totalExtraManFee = 0;
+                                dr["Carrier FSC"] = 0;
+                            }
+                        }
+                        else if (deliveryType.ToUpper() == "RETURN")
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(return_rate)))
+                            {
+                                if (return_rate_type.ToString().ToUpper() == "F")
+                                {
+                                    carrierBasePay = return_rate;
+                                }
+                                else
+                                {
+                                    carrierBasePay = Math.Round(Convert.ToDouble(carrierBasePay * return_rate) / 100, 2);
+                                }
+                                dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                                //totalStorageCharge = 0;
+                                //totalStaireCharge = 0;
+                                //totalMilesCharge = 0;
+                                //totalExtraManFee = 0;
+                                //dr["FSC"] = 0;
+                            }
+                        }
+                    }
+
+
+
+                    //  dr["charge2"] = totalStorageCharge;
+                    // dr["charge3"] = totalStaireCharge;
+                    // dr["Miles"] = Convert.ToInt32(totalMilesCharge);
+                    // dr["charge4"] = (totalExtraManFee);
+
+                    dr["charge2"] = totalStaireCharge;
+                    dr["charge3"] = totalMilesCharge;
+                    dr["charge4"] = totalExtraManFee;
+
+                    //if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                    //{
+                    //    if (carrierfscratetype.ToString().ToUpper() == "F")
+                    //    {
+                    //        dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                    //    }
+                    //    else
+                    //    {
+                    //        dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierBasePay * carrierfscratePercentage) / 100, 2);
+                    //    }
+                    //}
+
+                    if (pieceunitcount > 0)
+                    {
+                        //if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                        //{
+                        //    carrierBasePay = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                        //    if (carrierBasePay < minimumRate)
+                        //    {
+                        //        carrierBasePay = minimumRate;
+                        //    }
+                        //    dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                        //}
+
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                            dr["Carrier ACC"] = pieceunitcount * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+                    }
+                    else
+                    {
+                        //if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                        //{
+                        //    dr["Carrier Base Pay"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                        //    carrierBasePay = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                        //    if (carrierBasePay < minimumRate)
+                        //    {
+                        //        carrierBasePay = minimumRate;
+                        //    }
+                        //    dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                        //}
+                        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                            dr["Carrier ACC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+
+
+                    }
+                }
+
+                //if (tblBillRatesFiltered.Rows.Count > 0)
+                //{
+                //    double billRate = 0;
+                //    double minimumRate = 0;
+
+                //    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["minimum_rate"])))
+                //    {
+                //        minimumRate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["minimum_rate"]); ;
+                //    }
+
+                //    if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                //    {
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
+                //        {
+                //            billRate = Convert.ToDouble(1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]));
+                //            if (billRate < minimumRate)
+                //            {
+                //                billRate = minimumRate;
+                //            }
+                //            dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                //            dr["rate_buck_amt2"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
+                //            dr["Pieces ACC"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
+                //        {
+                //            if (fscratetype.ToString().ToUpper() == "F")
+                //            {
+                //                dr["FSC"] = Math.Round(Convert.ToDouble(fscratePercentage), 2);
+                //            }
+                //            else
+                //            {
+                //                dr["FSC"] = Math.Round(Convert.ToDouble(billRate * fscratePercentage) / 100, 2);
+                //            }
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                //            dr["rate_buck_amt4"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                //            dr["rate_buck_amt5"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                //            dr["rate_buck_amt6"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                //            dr["rate_buck_amt7"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                //            dr["rate_buck_amt8"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                //            dr["rate_buck_amt9"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                //            dr["rate_buck_amt11"] = 1 * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                //    }
+                //    else
+                //    {
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"])))
+                //        {
+                //            billRate = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt1"]);
+                //            if (billRate < minimumRate)
+                //            {
+                //                billRate = minimumRate;
+                //            }
+                //            dr["Bill Rate"] = Math.Round(Convert.ToDouble(billRate), 2);
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"])))
+                //            dr["rate_buck_amt2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt2"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"])))
+                //            dr["Pieces ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt3"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
+                //        {
+                //            //  dr["FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt10"]);
+
+                //            if (fscratetype.ToString().ToUpper() == "F")
+                //            {
+                //                dr["FSC"] = Math.Round(Convert.ToDouble(fscratePercentage), 2);
+                //            }
+                //            else
+                //            {
+                //                dr["FSC"] = Math.Round(Convert.ToDouble(billRate * fscratePercentage) / 100, 2);
+                //            }
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"])))
+                //            dr["rate_buck_amt4"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt4"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"])))
+                //            dr["rate_buck_amt5"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt5"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"])))
+                //            dr["rate_buck_amt6"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt6"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"])))
+                //            dr["rate_buck_amt7"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt7"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"])))
+                //            dr["rate_buck_amt8"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt8"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"])))
+                //            dr["rate_buck_amt9"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt9"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"])))
+                //            dr["rate_buck_amt11"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblBillRatesFiltered.Rows[0]["rate_buck_amt11"]);
+
+                //    }
+                //}
+
+                //if (tblPayableRatesFiltered.Rows.Count > 0)
+                //{
+                //    double carrierBasePay = 0;
+                //    double minimumRate = 0;
+                //    if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["minimum_rate"])))
+                //    {
+                //        minimumRate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["minimum_rate"]);
+                //    }
+
+                //    if (string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                //    {
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                //        {
+                //            carrierBasePay = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                //            if (carrierBasePay < minimumRate)
+                //            {
+                //                carrierBasePay = minimumRate;
+                //            }
+                //            dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                //            dr["Carrier ACC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                //        {
+                //            //  dr["Carrier FSC"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
+                //            if (carrierfscratetype.ToString().ToUpper() == "F")
+                //            {
+                //                dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                //            }
+                //            else
+                //            {
+                //                dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierBasePay * carrierfscratePercentage) / 100, 2);
+                //            }
+                //        }
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
+                //            dr["charge2"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge3"])))
+                //            dr["charge3"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge3"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge4"])))
+                //            dr["charge4"] = 1 * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge4"]);
+
+                //    }
+                //    else
+                //    {
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge1"])))
+                //        {
+                //            // dr["Carrier Base Pay"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                //            carrierBasePay = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge1"]);
+                //            if (carrierBasePay < minimumRate)
+                //            {
+                //                carrierBasePay = minimumRate;
+                //            }
+                //            dr["Carrier Base Pay"] = Math.Round(Convert.ToDouble(carrierBasePay), 2);
+                //        }
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge5"])))
+                //            dr["Carrier ACC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge5"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                //        {
+                //            //dr["Carrier FSC"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge6"]);
+
+                //            if (carrierfscratetype.ToString().ToUpper() == "F")
+                //            {
+                //                dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                //            }
+                //            else
+                //            {
+                //                dr["Carrier FSC"] = Math.Round(Convert.ToDouble(carrierBasePay * carrierfscratePercentage) / 100, 2);
+                //            }
+                //        }
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge2"])))
+                //            dr["charge2"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge2"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge3"])))
+                //            dr["charge3"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge3"]);
+
+                //        if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["charge4"])))
+                //            dr["charge4"] = Convert.ToDouble(dr["Pieces"]) * Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["charge4"]);
+
+                //    }
+                //}
+
+            }
+
+            if (itemsToDelete.Count > 0)
+            {
+                if (dtBadData.Rows.Count > 0)
+                {
+                    var baditemsToDelete = new List<DataRow>();
+
+                    foreach (DataRow dr in dtCDSBadData.Rows)
+                    {
+                        // DataTable dtBad = dtBadData.Select("[Customer Reference]= '" + dr["CDS#"] + "'").CopyToDataTable();
+                        DataRow[] drBadresult = dtBadData.Select("[Customer Reference]= '" + dr[customerrefmappingcolumnname] + "'");
+
+                        if (!drBadresult.Any())
+                        {
+                            baditemsToDelete.Add(dr);
+                        }
+                    }
+                    foreach (var item in baditemsToDelete)
+                    {
+                        dtCDSBadData.Rows.Remove(item);
+                    }
+
+                    dtCDSBadData.AcceptChanges();
+
+                    dtCDSBadData.TableName = "BadData";
+                    string badDataFilePath = objCommon.GetConfigValue("BadDataFileFolder");
+                    objCommon.WriteDataToCsvFile(dtCDSBadData, badDataFilePath, fileName, dateTime);
+
+                }
+
+                if (dtMissingConfData.Rows.Count > 0)
+                {
+                    var missingconfigitemsToDelete = new List<DataRow>();
+
+                    foreach (DataRow dr in dtCDSMissingConfigData.Rows)
+                    {
+                        //DataTable dtmissingdt = dtMissingConfData.Select("[Customer Reference]= '" + dr["CDS#"] + "'").CopyToDataTable();
+                        DataRow[] drmissingresult = dtMissingConfData.Select("[Customer Reference]= '" + dr[customerrefmappingcolumnname] + "'");
+                        if (!drmissingresult.Any())
+                        {
+                            missingconfigitemsToDelete.Add(dr);
+                        }
+                    }
+
+                    foreach (var item in missingconfigitemsToDelete)
+                    {
+                        dtCDSMissingConfigData.Rows.Remove(item);
+                    }
+
+                    dtCDSMissingConfigData.AcceptChanges();
+
+                    dtCDSMissingConfigData.TableName = "MissingConf";
+                    string missingConfFilePath = objCommon.GetConfigValue("MissingConfFileFolder");
+                    objCommon.WriteDataToCsvFile(dtCDSMissingConfigData, missingConfFilePath, fileName, dateTime);
+
+                }
+
+                // to delete the row from the dtableOrderTemplateFinal if found bad data or missing config data.
+                foreach (var item in itemsToDelete)
+                {
+                    dtableOrderTemplateFinal.Rows.Remove(item);
+                }
+            }
+            dtableOrderTemplateFinal.AcceptChanges();
+
+
             return returnResponse;
         }
     }
