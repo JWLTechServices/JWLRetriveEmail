@@ -739,7 +739,7 @@ namespace JWLRetriveEmail
                                                                         string fromMail = objCommon.GetConfigValue("FromMailID");
                                                                         string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                                                         string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                                                        string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                                                                        string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                                                                         string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
                                                                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                                                         throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
@@ -855,7 +855,7 @@ namespace JWLRetriveEmail
                                                                                 string fromMail = objCommon.GetConfigValue("FromMailID");
                                                                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                                                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                                                                string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                                                                                string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                                                                                 string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
                                                                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                                                                 throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
@@ -935,7 +935,7 @@ namespace JWLRetriveEmail
                                                                                         string fromMail = objCommon.GetConfigValue("FromMailID");
                                                                                         string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                                                                         string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                                                                        string toMail = objCommon.GetConfigValue("ToMailID");
+                                                                                        string toMail = objCommon.GetConfigValue("CDSSendMissingConfEmailTo");
                                                                                         string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
                                                                                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                                                                         throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
@@ -5533,7 +5533,7 @@ namespace JWLRetriveEmail
                 string fromMail = objCommon.GetConfigValue("FromMailID");
                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                 string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                 throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
@@ -5649,7 +5649,7 @@ namespace JWLRetriveEmail
                     string fromMail = objCommon.GetConfigValue("FromMailID");
                     string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                     string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                    string toMail = objCommon.GetConfigValue("ToMailID");
+                    string toMail = objCommon.GetConfigValue("CDSSendBadDataEmailTo");
                     string subject = "Cabinet Count and Unit Count found greater than 0 for this record, in file -" + fileName;
                     objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                     //dr.Delete();
@@ -5707,7 +5707,7 @@ namespace JWLRetriveEmail
                         //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
 
                         executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
-                        executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                        executionLogMessage += "Missing Configuration for this record in billing rates" + System.Environment.NewLine;
                         executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
                         executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
                         executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
@@ -5719,7 +5719,7 @@ namespace JWLRetriveEmail
                         string fromMail = objCommon.GetConfigValue("FromMailID");
                         string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                         string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                        string toMail = objCommon.GetConfigValue("ToMailID");
+                        string toMail = objCommon.GetConfigValue("CDSSendMissingConfEmailTo");
                         string subject = "Missing Configuration for this record in file - " + fileName;
                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                         itemsToDelete.Add(dr);
@@ -5766,7 +5766,7 @@ namespace JWLRetriveEmail
                             //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
 
                             executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
-                            executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                            executionLogMessage += "Missing Configuration for this record in payable rates" + System.Environment.NewLine;
                             executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
                             executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
                             executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
@@ -5778,7 +5778,7 @@ namespace JWLRetriveEmail
                             string fromMail = objCommon.GetConfigValue("FromMailID");
                             string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                             string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                            string toMail = objCommon.GetConfigValue("ToMailID");
+                            string toMail = objCommon.GetConfigValue("CDSSendMissingConfEmailTo");
                             string subject = "Missing Configuration for this record in file - " + fileName;
                             objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                             itemsToDelete.Add(dr);
@@ -5825,7 +5825,7 @@ namespace JWLRetriveEmail
                                 //objCommon.WriteDataToCsvFile(dtMissingConfData, missingConfFilePath, fileName, dateTime);
 
                                 executionLogMessage = "CDS Order Template File Generation Error" + System.Environment.NewLine;
-                                executionLogMessage += "Missing Configuration for this record" + System.Environment.NewLine;
+                                executionLogMessage += "Missing Configuration for this record in payable rates" + System.Environment.NewLine;
                                 executionLogMessage += "Customer Reference -" + dr["Customer Reference"] + System.Environment.NewLine;
                                 executionLogMessage += "Cabinet Count -" + dr["Pieces"] + System.Environment.NewLine;
                                 executionLogMessage += "Unit Count -" + dr["UnitCount"] + System.Environment.NewLine;
@@ -5837,7 +5837,7 @@ namespace JWLRetriveEmail
                                 string fromMail = objCommon.GetConfigValue("FromMailID");
                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string toMail = objCommon.GetConfigValue("CDSSendMissingConfEmailTo");
                                 string subject = "Missing Configuration for this record in file - " + fileName;
                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                 itemsToDelete.Add(dr);
@@ -5880,7 +5880,7 @@ namespace JWLRetriveEmail
                         string fromMail = objCommon.GetConfigValue("FromMailID");
                         string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                         string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                        string toMail = objCommon.GetConfigValue("CDSSendExceptionEmail");
+                        string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                         string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                         throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
@@ -5919,7 +5919,7 @@ namespace JWLRetriveEmail
                                 string fromMail = objCommon.GetConfigValue("FromMailID");
                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                                 string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                 throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
@@ -5960,7 +5960,7 @@ namespace JWLRetriveEmail
                                 string fromMail = objCommon.GetConfigValue("FromMailID");
                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
                                 string subject = "FSC Billing Rates missing for this fuel charge   " + fuelcharge;
                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
                                 throw new NullReferenceException("Diesel prices missing for date  " + dtdeliveryDate);
