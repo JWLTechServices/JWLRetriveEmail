@@ -603,6 +603,7 @@ namespace JWLRetriveEmail
                                                         dtableOrderTemplate.Columns.Add("add_charge_code6");
                                                         dtableOrderTemplate.Columns.Add("Pickup special instr long");
                                                         dtableOrderTemplate.Columns.Add("status_code");
+                                                        dtableOrderTemplate.Columns.Add("settlement_pct");
 
 
                                                         if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
@@ -5377,6 +5378,11 @@ namespace JWLRetriveEmail
                                 _newRow["add_charge_code6"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["add_charge_code6_Value"]);
                             }
 
+                            if (!string.IsNullOrEmpty(Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["settlement_pct_Value"])))
+                            {
+                                _newRow["settlement_pct"] = Convert.ToString(objDsRes.DS.Tables[0].Rows[0]["settlement_pct_Value"]);
+                            }
+
                             if (customerName == objCommon.GetConfigValue("CDSCustomerName"))
                             {
                                 if (dr.Table.Columns.Contains("UnitCount"))
@@ -5475,6 +5481,8 @@ namespace JWLRetriveEmail
                                 {
                                     _newRow["Men"] = "";
                                 }
+
+                               
                             }
 
                             dtableOrderTemplate.Rows.Add(_newRow);
