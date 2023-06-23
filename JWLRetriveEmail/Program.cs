@@ -23,7 +23,8 @@ namespace JWLRetriveEmail
         public static string pricingInfoMissingFilePath = "";
         public static bool fscInfoMissingFlag = false;
         public static string fscInfoMissingFilePath = "";
-
+        public static bool storeAddressDetailsMissingFlag = false;
+        public static string storeAddressDetailsMissingFilePath = "";
         static void Main(string[] args)
         {
 
@@ -107,11 +108,13 @@ namespace JWLRetriveEmail
                         string BBWReadEmailSubject = objCommon.GetConfigValue("BBWReadEmailSubject");
                         string ROVCONReadEmailSubject = objCommon.GetConfigValue("ROVCONReadEmailSubject");
                         string BLUDOTReadEmailSubject = objCommon.GetConfigValue("BLUDOTReadEmailSubject");
-
+                        string SALLYBEAUTYReadEmailSubject = objCommon.GetConfigValue("SALLYBEAUTYReadEmailSubject");
                         if ((oMail.Subject.Contains(BBBReadEmailSubject) || oMail.Subject.Contains(MXDRYDReadEmailSubject)
                             || oMail.Subject.Contains(TGTReadEmailSubject) || oMail.Subject.Contains(LBRANDSReadEmailSubject)
                             || oMail.Subject.Contains(CDSReadEmailSubject) || oMail.Subject.Contains(BBWReadEmailSubject)
-                            || oMail.Subject.Contains(ROVCONReadEmailSubject) || oMail.Subject.Contains(ROVCONReadEmailSubject)))
+                            || oMail.Subject.Contains(ROVCONReadEmailSubject) || oMail.Subject.Contains(ROVCONReadEmailSubject)
+                            || oMail.Subject.Contains(SALLYBEAUTYReadEmailSubject)
+                            ))
                         {
                             //  continue;
                             executionLogMessage = "ReadEmailOnlyFrom :  " + oMail.From.Address.ToString() + System.Environment.NewLine;
@@ -438,6 +441,240 @@ namespace JWLRetriveEmail
                                                                 objCommon.WriteExecutionLog(executionLogMessage);
                                                             }
                                                             //clsExcelHelper.ExportDataToXLSX(dtable, attachmentPath, fileName);
+                                                            clsExcelHelperNew.ExportDataTableToXLSX(dtable, attachmentPath, fileName);
+                                                            objCommon.CleanAttachmentWorkingFolder();
+                                                        }
+                                                        else if (customerName.ToUpper() == "SALLYBEAUTY")
+                                                        {
+                                                            DataTable dtable = new DataTable();
+                                                            dtable.Clear();
+                                                            dtable.Columns.Add("Customer_Reference");
+                                                            dtable.Columns.Add("Bol Number");
+                                                            dtable.Columns.Add("Service Type");
+                                                            dtable.Columns.Add("Delivery Name");
+                                                            dtable.Columns.Add("Delivery Address");
+                                                            dtable.Columns.Add("Delivery State");
+                                                            dtable.Columns.Add("Delivery City");
+                                                            dtable.Columns.Add("Delivery Zip");
+                                                            dtable.Columns.Add("Delivery Phone Number");
+                                                            dtable.Columns.Add("Item Number");
+                                                            dtable.Columns.Add("Item Description");
+                                                            dtable.Columns.Add("Pieces");
+                                                            dtable.Columns.Add("Weight");
+                                                            dtable.Columns.Add("Return");
+                                                            dtable.Columns.Add("Special Instructions 1");
+                                                            dtable.Columns.Add("Item Comment");
+                                                            dtable.Columns.Add("Special Instructions 2");
+
+                                                            DataTable dtStoreAddressDetailsMissingData = new DataTable();
+                                                            dtStoreAddressDetailsMissingData.Columns.Add("File Name");
+                                                            dtStoreAddressDetailsMissingData.Columns.Add("Error");
+                                                            dtStoreAddressDetailsMissingData.Columns.Add("Store Number");
+
+                                                            objDsResponse = objCommon.GetRouteStopCustomerMappingDetails(customerName, locationCode, productCode);
+                                                            if (objDsResponse.dsResp.ResponseVal)
+                                                            {
+                                                                customerNumber = Convert.ToString(objDsResponse.DS.Tables[0].Rows[0]["CustomerNumber"]);
+                                                            }
+                                                            else
+                                                            {
+                                                                executionLogMessage = "RouteStop Customer Mapping Details Missing " + System.Environment.NewLine;
+                                                                executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                                executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                                executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                                executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                                emailSubject = "RouteStop Customer Mapping Details Missing";
+                                                                objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                                                objCommon.WriteExecutionLog(executionLogMessage);
+                                                                return;
+                                                            }
+
+                                                            DataTable dtStoreAddress = new DataTable();
+                                                            objDsResponse = objCommon.GetRouteStopStoreAddressDetails(Convert.ToInt32(company_no), Convert.ToInt32(customerNumber));
+                                                            if (objDsResponse.dsResp.ResponseVal)
+                                                            {
+                                                                dtStoreAddress = objDsResponse.DS.Tables[0].Copy();
+                                                            }
+                                                            else
+                                                            {
+                                                                executionLogMessage = "RouteStop Store Address Mapping Details Missing " + System.Environment.NewLine;
+                                                                executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                                executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                                executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                                executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                                emailSubject = "RouteStop Store Address Mapping Details Missing";
+                                                                objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                                                objCommon.WriteExecutionLog(executionLogMessage);
+                                                                return;
+                                                            }
+
+                                                            DataView view = new DataView(dataTable);
+                                                            DataTable dtdistinctStoreValues = view.ToTable(true, "StoreNum");
+
+                                                            DataTable dtMissingStoreAddress = new DataTable();
+                                                            foreach (DataRow dr in dtdistinctStoreValues.Rows)
+                                                            {
+                                                                string storenumber = Convert.ToString(dr["StoreNum"]);
+
+                                                                DataRow[] drresult = dtStoreAddress.Select("StoreNumber = '" + Convert.ToInt32(storenumber) + "'");
+
+                                                                if (drresult.Length == 0)
+                                                                {
+                                                                    if (dtMissingStoreAddress.Rows.Count > 0)
+                                                                    {
+                                                                        DataTable dtBusy = dataTable.Select("[StoreNum]= '" + storenumber + "'").CopyToDataTable();
+                                                                        for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                                        {
+                                                                            DataRow dr1 = dtMissingStoreAddress.NewRow();
+                                                                            for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                                            {
+                                                                                dr1[column] = dtBusy.Rows[row][column];
+                                                                            }
+                                                                            dtMissingStoreAddress.Rows.Add(dr1.ItemArray);
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        dtMissingStoreAddress = dataTable.Select("[StoreNum]= '" + storenumber + "'").CopyToDataTable();
+                                                                    }
+
+
+                                                                    DataRow[] dtr = dataTable.Select("[StoreNum]= '" + storenumber + "'");
+                                                                    foreach (var drow in dtr)
+                                                                    {
+                                                                        drow.Delete();
+                                                                    }
+                                                                    dataTable.AcceptChanges();
+                                                                }
+                                                            }
+
+                                                            foreach (DataRow dr in dataTable.Rows)
+                                                            {
+                                                                DataRow _newRow = dtable.NewRow();
+
+                                                                object value = dr["BOLNum"];
+                                                                if (value == DBNull.Value)
+                                                                    break;
+
+                                                                string storenumber = Convert.ToString(dr["StoreNum"]);
+
+                                                                try
+                                                                {
+                                                                    DataRow[] drresult = dtStoreAddress.Select("StoreNumber = '" + Convert.ToInt32(storenumber) + "'");
+
+                                                                    if (drresult.Length > 0)
+                                                                    {
+                                                                        _newRow["Customer_Reference"] = dr["BOLNum"];
+                                                                        _newRow["Bol Number"] = dr["BOLNum"];
+                                                                        _newRow["Service Type"] = objCommon.GetConfigValue("SALLYBEAUTYServiceLevel");
+                                                                        _newRow["Delivery Name"] = storenumber;
+                                                                        _newRow["Delivery Address"] = Convert.ToString(drresult[0]["Address1"]);
+                                                                        _newRow["Delivery City"] = Convert.ToString(drresult[0]["City"]);
+                                                                        _newRow["Delivery State"] = Convert.ToString(drresult[0]["State"]);
+                                                                        _newRow["Delivery Zip"] = Convert.ToString(drresult[0]["ZipCode"]);
+                                                                        _newRow["Special Instructions 1"] = dr["TrailerID"];
+                                                                        _newRow["Item Comment"] = dr["Timestamp"];
+                                                                        _newRow["Special Instructions 2"] = dr["ActTrail#"];
+                                                                        _newRow["Item Number"] = dr["CartonID"];
+                                                                        _newRow["Item Description"] = dr["CartonID"];
+                                                                        dtable.Rows.Add(_newRow);
+                                                                    }
+                                                                    //else
+                                                                    //{
+
+                                                                    //    DataRow[] drMissingresult = dtMissingStoreAddress.Select("StoreNum = '" + (storenumber) + "'");
+
+                                                                    //    if (drMissingresult.Length == 0)
+                                                                    //    {
+                                                                    //        if (dtMissingStoreAddress.Rows.Count > 0)
+                                                                    //        {
+                                                                    //            DataTable dtBusy = dataTable.Select("[StoreNum]= '" + storenumber + "'").CopyToDataTable();
+                                                                    //            for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                                    //            {
+                                                                    //                DataRow dr1 = dtMissingStoreAddress.NewRow();
+                                                                    //                for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                                    //                {
+                                                                    //                    dr1[column] = dtBusy.Rows[row][column];
+                                                                    //                }
+                                                                    //                dtMissingStoreAddress.Rows.Add(dr1.ItemArray);
+                                                                    //            }
+                                                                    //        }
+                                                                    //        else
+                                                                    //        {
+                                                                    //            dtMissingStoreAddress = dataTable.Select("[StoreNum]= '" + storenumber + "'").CopyToDataTable();
+                                                                    //        }
+
+                                                                    //    }
+
+                                                                    //}
+                                                                }
+                                                                catch (Exception ex)
+                                                                {
+
+                                                                    storeAddressDetailsMissingFlag = true;
+
+                                                                    executionLogMessage = "Route stop file Creation Exception -" + ex.Message + System.Environment.NewLine;
+                                                                    executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                    executionLogMessage += "Store Number  -" + storenumber + System.Environment.NewLine;
+                                                                    executionLogMessage += "customer refernce  -" + value + System.Environment.NewLine;
+                                                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                                                    objCommon.WriteErrorLog(ex, executionLogMessage);
+
+                                                                    executionLogMessage = "Store  Address Details not found for this store number : " + storenumber + "customer refernce -" + value + System.Environment.NewLine;
+                                                                    executionLogMessage += "So processed this file without this store number , please update the Store Address details table with appropriate values." + System.Environment.NewLine;
+                                                                    executionLogMessage += "File Name : " + fileName + System.Environment.NewLine;
+                                                                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                                                                    executionLogMessage = "Store Details not found for this store number : " + storenumber + ". Please provide the updated Store details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+
+                                                                    DataRow _newdtRow = dtStoreAddressDetailsMissingData.NewRow();
+                                                                    _newdtRow["File Name"] = fileName;
+                                                                    _newdtRow["Error"] = executionLogMessage;
+                                                                    _newdtRow["Store Number"] = value;
+                                                                    dtStoreAddressDetailsMissingData.Rows.Add(_newdtRow);
+
+                                                                    dtStoreAddressDetailsMissingData.TableName = "Store Address Details Missing";
+                                                                    string storeAddressDetailsMissingFileFolder = objCommon.GetConfigValue("StoreAddressDetailsMissingFileFolder");
+                                                                    storeAddressDetailsMissingFilePath = objCommon.GetConfigValue("StoreAddressDetailsMissingFileFolder") + @"\" + dtStoreAddressDetailsMissingData.TableName + "-" + datetime + ".csv";
+                                                                    objCommon.WriteDataToCsvFile(dtStoreAddressDetailsMissingData, storeAddressDetailsMissingFileFolder, "", datetime);
+                                                                    dtStoreAddressDetailsMissingData.Clear();
+
+                                                                }
+                                                            }
+
+                                                            if (dtMissingStoreAddress.Rows.Count > 0)
+                                                            {
+                                                                string fileNamewithuoutExt = "";
+                                                                int fileExtPos = fileName.LastIndexOf(".");
+                                                                if (fileExtPos >= 0)
+                                                                    fileNamewithuoutExt = fileName.Substring(0, fileExtPos);
+
+                                                                dtMissingStoreAddress.TableName = fileNamewithuoutExt;
+                                                                string storeAddressDetailsMissingCsvFilePath = objCommon.GetConfigValue("StoreAddressDetailsMissingFileFolder") + @"\" + dtMissingStoreAddress.TableName + "-" + datetime + ".csv";
+                                                                string storeAddressDetailsMissingFileFolder = objCommon.GetConfigValue("StoreAddressDetailsMissingFileFolder");
+
+                                                                objCommon.WriteSallyBeautyDataToCsvFile(dtMissingStoreAddress, storeAddressDetailsMissingFileFolder, "", datetime);
+
+                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                string toMail = objCommon.GetConfigValue("SendStoreAddressDetailsMissingInputFileToEmail");
+                                                                string subject = "Store Address details missing records attached with this email";
+                                                                string body = "Store Address details missing records attached with this email" + System.Environment.NewLine;
+                                                                body += "Original File Name : " + fileName + System.Environment.NewLine + System.Environment.NewLine + System.Environment.NewLine;
+                                                                body += "Please note, except these attached records all the other records processed successfully" + System.Environment.NewLine;
+                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, body, storeAddressDetailsMissingCsvFilePath);
+                                                                storeAddressDetailsMissingCsvFilePath = "";
+                                                            }
+
+                                                            dtable.TableName = "Template";
+                                                            IsSeen = true;
+                                                            if (!info.Read && IsSeen)
+                                                            {
+                                                                oClient.MarkAsRead(info, true);
+                                                                executionLogMessage = "Mark email as read, From :  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
+                                                                objCommon.WriteExecutionLog(executionLogMessage);
+                                                            }
                                                             clsExcelHelperNew.ExportDataTableToXLSX(dtable, attachmentPath, fileName);
                                                             objCommon.CleanAttachmentWorkingFolder();
                                                         }
@@ -1525,6 +1762,16 @@ namespace JWLRetriveEmail
                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, fscInfoMissingFilePath);
                     }
 
+                    if (storeAddressDetailsMissingFlag)
+                    {
+                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                        string toMail = objCommon.GetConfigValue("SendStoreAddressDetailsMissingEmail");
+                        string subject = "Store Address details missing records attached with this email";
+                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, storeAddressDetailsMissingFilePath);
+                        storeAddressDetailsMissingFilePath = "";
+                    }
 
                 }
                 catch (Exception ex)
@@ -3591,7 +3838,7 @@ namespace JWLRetriveEmail
                         //string subject = "Band Details not found for this store number : " + storenumber + " - Original file: " + OriginlafileName;
                         //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
 
-                        executionLogMessage = "Band Details not found for this store number : " + storenumber +". Please provide the updated Store Band details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+                        executionLogMessage = "Band Details not found for this store number : " + storenumber + ". Please provide the updated Store Band details with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
 
                         DataRow _newRow = dtBandDetailsMissingData.NewRow();
                         _newRow["Original File Name"] = OriginlafileName;
@@ -3737,7 +3984,7 @@ namespace JWLRetriveEmail
                             //string subject = "Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
                             //objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
 
-                            executionLogMessage = "Diesel price is missing for date " + dtdeliveryDate.ToShortDateString() +". Please update the fsc sheet with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
+                            executionLogMessage = "Diesel price is missing for date " + dtdeliveryDate.ToShortDateString() + ". Please update the fsc sheet with appropriate values to get this order processed. It is currently held back from going into Data Trac.";
 
 
                             DataRow _newRow = dtMissingDieselPriceData.NewRow();
@@ -5482,7 +5729,7 @@ namespace JWLRetriveEmail
                                     _newRow["Men"] = "";
                                 }
 
-                               
+
                             }
 
                             dtableOrderTemplate.Rows.Add(_newRow);
