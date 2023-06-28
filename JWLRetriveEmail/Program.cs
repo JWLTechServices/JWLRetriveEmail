@@ -462,9 +462,10 @@ namespace JWLRetriveEmail
                                                             dtable.Columns.Add("Pieces");
                                                             dtable.Columns.Add("Weight");
                                                             dtable.Columns.Add("Return");
-                                                            dtable.Columns.Add("Special Instructions 1");
+                                                           // dtable.Columns.Add("Special Instructions 1");
                                                             dtable.Columns.Add("Item Comment");
-                                                            dtable.Columns.Add("Special Instructions 2");
+                                                          //  dtable.Columns.Add("Special Instructions 2");
+                                                            dtable.Columns.Add("Item Container Id");
 
                                                             DataTable dtStoreAddressDetailsMissingData = new DataTable();
                                                             dtStoreAddressDetailsMissingData.Columns.Add("File Name");
@@ -572,11 +573,13 @@ namespace JWLRetriveEmail
                                                                         _newRow["Delivery City"] = Convert.ToString(drresult[0]["City"]);
                                                                         _newRow["Delivery State"] = Convert.ToString(drresult[0]["State"]);
                                                                         _newRow["Delivery Zip"] = Convert.ToString(drresult[0]["ZipCode"]);
-                                                                        _newRow["Special Instructions 1"] = dr["TrailerID"];
+                                                                        // _newRow["Special Instructions 1"] = dr["TrailerID"];
                                                                         _newRow["Item Comment"] = dr["Timestamp"];
-                                                                        _newRow["Special Instructions 2"] = dr["ActTrail#"];
+                                                                        // _newRow["Special Instructions 2"] = dr["ActTrail#"];
                                                                         _newRow["Item Number"] = dr["CartonID"];
                                                                         _newRow["Item Description"] = dr["CartonID"];
+                                                                        _newRow["Item Container Id"] = dr["TrailerID"] + "-" + dr["ActTrail#"];
+
                                                                         dtable.Rows.Add(_newRow);
                                                                     }
                                                                     //else
