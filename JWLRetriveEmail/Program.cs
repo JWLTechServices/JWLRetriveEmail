@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using static JWLRetriveEmail.clsCommon;
 
 namespace JWLRetriveEmail
 {
@@ -157,6 +158,165 @@ namespace JWLRetriveEmail
                                         {
                                             productSubCode = fileName.Split('-')[3].ToUpper();
                                         }
+
+                                        if (customerName == objCommon.GetConfigValue("CDSCustomerName") && productCode == "OD")
+                                        {
+                                            string cdsProcessInDataTrac = objCommon.GetConfigValue("CDSProcessInDataTrac");
+                                            //string cdsProcessInEnterprise = objCommon.GetConfigValue("CDSProcessInEnterprise");
+                                            //bool flagcdsProcessCompletedInDataTrac = false;
+                                            //bool flagcdsProcessedInEnterprise = false;
+
+                                            ReturnResponse returnResponseDatatrac = new ReturnResponse();
+                                            if (cdsProcessInDataTrac == "Y")
+                                            {
+                                                clsODCDS objclsODCDS = new clsODCDS();
+
+                                                returnResponseDatatrac = objclsODCDS.ProcessCDSODData(oMail, att, customerName, locationCode, productCode, productSubCode, fileName, extn, datetime);
+                                                if (returnResponseDatatrac.ResponseVal)
+                                                {
+                                                    //flagcdsProcessCompletedInDataTrac = true;
+                                                    IsSeen = true;
+                                                    executionLogMessage = "Generating CDS order create input file for Data Trac is successful" + System.Environment.NewLine;
+                                                    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                    objCommon.WriteExecutionLog(executionLogMessage);
+
+                                                    clsODCDS_Enterprise objclsODCDS_Enterprise = new clsODCDS_Enterprise();
+                                                    ReturnResponse returnResponseEnterprise = new ReturnResponse();
+                                                    returnResponseEnterprise = objclsODCDS_Enterprise.ProcessCDSODData(oMail, att, customerName, locationCode, productCode, productSubCode, fileName, extn, datetime);
+                                                    if (returnResponseEnterprise.ResponseVal)
+                                                    {
+                                                       
+                                                        executionLogMessage = "Generating CDS order create input file for Enterprise is successful" + System.Environment.NewLine;
+                                                        executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                        executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                        executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                        executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                        objCommon.WriteExecutionLog(executionLogMessage);
+                                                    }
+                                                    else
+                                                    {
+                                                        executionLogMessage = "Error-Generating CDS order create input file for Enterprise, " + System.Environment.NewLine;
+                                                        executionLogMessage += objCommon.GetConfigValue("CDSProcessingErrorMessage") + System.Environment.NewLine;
+                                                        executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                        executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                        executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                        executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                        executionLogMessage += "Error -" + returnResponseEnterprise.Reason + System.Environment.NewLine;
+                                                        emailSubject = "Immediate action required. Error-Generating CDS order create input file for Enterprise";
+                                                        objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                                        objCommon.WriteExecutionLog(executionLogMessage);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    executionLogMessage = "Error-DT-Generating CDS order create input file for Data Trac" + System.Environment.NewLine;
+                                                    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                    executionLogMessage += "Error -" + returnResponseDatatrac.Reason + System.Environment.NewLine;
+                                                    emailSubject = "Error-DT-Generating CDS order create input file for Data Trac";
+                                                    objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                                    // continue;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //flagcdsProcessCompletedInDataTrac = true;
+
+                                                ReturnResponse returnResponseEnterprise = new ReturnResponse();
+                                                clsODCDS_Enterprise objclsODCDS_Enterprise = new clsODCDS_Enterprise();
+                                                returnResponseEnterprise = objclsODCDS_Enterprise.ProcessCDSODData(oMail, att, customerName, locationCode, productCode, productSubCode, fileName, extn, datetime);
+                                                if (returnResponseEnterprise.ResponseVal)
+                                                {
+                                                    IsSeen = true;
+                                                    //flagcdsProcessedInEnterprise = true;
+                                                    executionLogMessage = "Generating CDS order create input file for Enterprise is successful" + System.Environment.NewLine;
+                                                    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                                }
+                                                else
+                                                {
+                                                    executionLogMessage = "Error-Generating CDS order create input file for Enterprise" + System.Environment.NewLine;
+                                                    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                                    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                                    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                                    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                                    executionLogMessage += "Error -" + returnResponseEnterprise.Reason + System.Environment.NewLine;
+                                                    emailSubject = "Error-Generating CDS order create input file for Enterprise";
+                                                    objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                                    objCommon.WriteExecutionLog(executionLogMessage);
+                                                    //continue;
+                                                }
+                                            }
+
+                                            // if (cdsProcessInDataTrac == "Y" && cdsProcessInEnterprise == "Y")
+                                            //if (cdsProcessInDataTrac == "Y")
+                                            //{
+                                            //if (flagcdsProcessedInDataTrac && flagcdsProcessedInEnterprise)
+                                            //{
+                                            //    IsSeen = true;
+                                            //}
+                                            //else if (flagcdsProcessedInDataTrac && !flagcdsProcessedInEnterprise)
+                                            //{
+                                            //    IsSeen = true;
+                                            //    executionLogMessage = "Error-Generating CDS order create input file for Enterprise, " + System.Environment.NewLine;
+                                            //    executionLogMessage += objCommon.GetConfigValue("CDSProcessingErrorMessage") + System.Environment.NewLine;
+                                            //    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                            //    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                            //    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                            //    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                            //    executionLogMessage += "Error -" + returnResponseEnterprise.Reason + System.Environment.NewLine;
+                                            //    emailSubject = "Immediate action required. Error-Generating CDS order create input file for Enterprise";
+                                            //    objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                            //    objCommon.WriteExecutionLog(executionLogMessage);
+                                            //}
+                                            //else if (flagcdsProcessedInEnterprise && !flagcdsProcessedInDataTrac)
+                                            //{
+                                            //    IsSeen = true;
+                                            //    executionLogMessage = "Error-Processing CDS Data in Data Trac, " + System.Environment.NewLine;
+                                            //    executionLogMessage += "Immediate action required, Please note this file is generated order create input file for Enterprise and email as marked as read. but found some issue while generating order create input file for Data Trac" + System.Environment.NewLine;
+                                            //    executionLogMessage += "CustomerName -" + customerName + System.Environment.NewLine;
+                                            //    executionLogMessage += "LocationCode -" + locationCode + System.Environment.NewLine;
+                                            //    executionLogMessage += "ProductCode -" + productCode + System.Environment.NewLine;
+                                            //    executionLogMessage += "FileName -" + fileName + System.Environment.NewLine;
+                                            //    executionLogMessage += "Error -" + returnResponseDatatrac.Reason + System.Environment.NewLine;
+                                            //    emailSubject = "Immediate action required. Error Generating CDS order create input file for Data Trac";
+                                            //    objCommon.SendExceptionMail(emailSubject, executionLogMessage);
+                                            //    objCommon.WriteExecutionLog(executionLogMessage);
+                                            //}
+                                            //}
+                                            //else if (cdsProcessInDataTrac == "Y")
+                                            //{
+                                            //    if (flagcdsProcessedInDataTrac)
+                                            //    {
+                                            //        IsSeen = true;
+                                            //    }
+                                            //}
+                                            //else if (cdsProcessInEnterprise == "Y")
+                                            //{
+                                            //    if (flagcdsProcessedInEnterprise)
+                                            //    {
+                                            //        IsSeen = true;
+                                            //    }
+                                            //}
+                                            if (!info.Read && IsSeen)
+                                            {
+                                                oClient.MarkAsRead(info, true);
+                                                executionLogMessage = "Mark email as read, From:  " + oMail.From.ToString() + " , ReceivedDate" + oMail.ReceivedDate;
+                                                objCommon.WriteExecutionLog(executionLogMessage);
+                                            }
+                                            //break;
+                                            continue;
+                                        }
+
                                         clsCommon.DSResponse objCMDsResponse = new clsCommon.DSResponse();
                                         objCMDsResponse = objCommon.GetReadEmailMappingDetails(customerName, locationCode, productCode);
                                         if (objCMDsResponse.dsResp.ResponseVal)
@@ -462,9 +622,9 @@ namespace JWLRetriveEmail
                                                             dtable.Columns.Add("Pieces");
                                                             dtable.Columns.Add("Weight");
                                                             dtable.Columns.Add("Return");
-                                                           // dtable.Columns.Add("Special Instructions 1");
+                                                            // dtable.Columns.Add("Special Instructions 1");
                                                             dtable.Columns.Add("Item Comment");
-                                                          //  dtable.Columns.Add("Special Instructions 2");
+                                                            //  dtable.Columns.Add("Special Instructions 2");
                                                             dtable.Columns.Add("Item Container Id");
 
                                                             DataTable dtStoreAddressDetailsMissingData = new DataTable();
@@ -1775,7 +1935,6 @@ namespace JWLRetriveEmail
                         objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, subject, storeAddressDetailsMissingFilePath);
                         storeAddressDetailsMissingFilePath = "";
                     }
-
                 }
                 catch (Exception ex)
                 {

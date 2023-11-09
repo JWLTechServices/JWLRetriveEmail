@@ -686,6 +686,7 @@ namespace JWLRetriveEmail
 
             }
         }
+
         public DSResponse GetOrderPostTemplateDetails(string CustomerName, string LocationCode, string ProductCode, string ProductSubCode)
         {
             DSResponse objResponse = new DSResponse();
