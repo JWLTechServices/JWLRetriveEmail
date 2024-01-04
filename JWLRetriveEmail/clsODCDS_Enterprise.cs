@@ -296,11 +296,25 @@ namespace JWLRetriveEmail
                                                 var invCulture = System.Globalization.CultureInfo.InvariantCulture;
                                                 string deliveryName = Convert.ToString(dr["Customer Name"]);
                                                 deliveryName = deliveryName.Replace("'", "");
+
+                                                int miles = 0;
+                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                                                {
+                                                    miles = Convert.ToInt32(dr["Miles"]);
+                                                    if (miles < 0)
+                                                    {
+                                                        dr["Miles"] = 0;
+                                                        miles = 0;
+                                                    }
+                                                }
+
                                                 DataTable tblBillRatesFiltered = new DataTable();
 
                                                 IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
                                                 .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                                                         && row.Field<string>("DeliveryName") == deliveryName);
+                                                         && row.Field<string>("DeliveryName") == deliveryName
+                                                         && (row.Field<decimal>("minimum_miles") <= miles)
+                                                         && (miles <= row.Field<decimal>("maximum_miles")));
 
                                                 if (billratesfilteredRows.Any())
                                                 {
@@ -310,7 +324,9 @@ namespace JWLRetriveEmail
                                                 {
                                                     billratesfilteredRows = dtBillingRates.AsEnumerable()
                                              .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                                             && row.Field<string>("DeliveryName") is null);
+                                             && row.Field<string>("DeliveryName") is null
+                                             && (row.Field<decimal>("minimum_miles") <= miles)
+                                             && (miles <= row.Field<decimal>("maximum_miles")));
 
                                                     if (billratesfilteredRows.Any())
                                                     {
@@ -321,7 +337,9 @@ namespace JWLRetriveEmail
                                                 DataTable tblPayableRatesFiltered = new DataTable();
                                                 IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
                                                 .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                                                && row.Field<string>("DeliveryName") == deliveryName);
+                                                && row.Field<string>("DeliveryName") == deliveryName
+                                                && (row.Field<decimal>("minimum_miles") <= miles)
+                                                && (miles <= row.Field<decimal>("maximum_miles")));
 
 
                                                 if (payableratesfilteredRows.Any())
@@ -332,7 +350,9 @@ namespace JWLRetriveEmail
                                                 {
                                                     payableratesfilteredRows = dtPayableRates.AsEnumerable()
                                                 .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                                                && row.Field<string>("DeliveryName") is null);
+                                                && row.Field<string>("DeliveryName") is null
+                                                && (row.Field<decimal>("minimum_miles") <= miles)
+                                                && (miles <= row.Field<decimal>("maximum_miles")));
 
                                                     if (payableratesfilteredRows.Any())
                                                     {
@@ -3566,11 +3586,24 @@ namespace JWLRetriveEmail
                     pieceunitcount = Convert.ToInt32(dr["UnitCount"]);
                 }
 
+                int miles = 0;
+                if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                {
+                    miles = Convert.ToInt32(dr["Miles"]);
+                    if (miles < 0)
+                    {
+                        dr["Miles"] = 0;
+                        miles = 0;
+                    }
+                }
+
                 DataTable tblBillRatesFiltered = new DataTable();
 
                 IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
                 .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                         && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+                         && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y"
+                         && (row.Field<decimal>("minimum_miles") <= miles)
+                         && (miles <= row.Field<decimal>("maximum_miles")));
 
                 if (billratesfilteredRows.Any())
                 {
@@ -3580,7 +3613,9 @@ namespace JWLRetriveEmail
                 {
                     billratesfilteredRows = dtBillingRates.AsEnumerable()
              .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-             && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+              && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y"
+              && (row.Field<decimal>("minimum_miles") <= miles)
+              && (miles <= row.Field<decimal>("maximum_miles")));
 
                     if (billratesfilteredRows.Any())
                     {
@@ -3635,7 +3670,9 @@ namespace JWLRetriveEmail
                         payableratesfilteredRows = dtPayableRates.AsEnumerable()
                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
                        && (row.Field<string>("DeliveryName") == deliveryName)
-                       && (row.Field<decimal>("minimumcount") <= pieceunitcount) && (pieceunitcount <= row.Field<decimal>("maximumcount")) && row.Field<string>("IsActive") == "Y");
+                       && (row.Field<decimal>("minimumcount") <= pieceunitcount) && (pieceunitcount <= row.Field<decimal>("maximumcount")) && row.Field<string>("IsActive") == "Y"
+                       && (row.Field<decimal>("minimum_miles") <= miles)
+                       && (miles <= row.Field<decimal>("maximum_miles")));
 
                         if (payableratesfilteredRows.Any())
                         {
@@ -3686,7 +3723,9 @@ namespace JWLRetriveEmail
 
                         payableratesfilteredRows = dtPayableRates.AsEnumerable()
                         .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                        && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+                        && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y"
+                        && (row.Field<decimal>("minimum_miles") <= miles)
+                        && (miles <= row.Field<decimal>("maximum_miles")));
 
                         if (payableratesfilteredRows.Any())
                         {
@@ -3696,7 +3735,9 @@ namespace JWLRetriveEmail
                         {
                             payableratesfilteredRows = dtPayableRates.AsEnumerable()
                         .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate"))
-                        && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                        && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y"
+                        && (row.Field<decimal>("minimum_miles") <= miles)
+                        && (miles <= row.Field<decimal>("maximum_miles")));
 
                             if (payableratesfilteredRows.Any())
                             {
@@ -3885,7 +3926,7 @@ namespace JWLRetriveEmail
                     double extra_man_fees = 0;
                     string will_call_type = string.Empty;
                     double will_call_charge = 0;
-                    int miles = 0;
+                   // int miles = 0;
                     int men = 0;
                     double totalMilesCharge = 0;
                     double totalExtraManFee = 0;
@@ -4258,7 +4299,7 @@ namespace JWLRetriveEmail
                     double extra_man_fees = 0;
                     string will_call_type = string.Empty;
                     double will_call_charge = 0;
-                    int miles = 0;
+                   // int miles = 0;
                     int men = 0;
                     double totalMilesCharge = 0;
                     double totalExtraManFee = 0;
