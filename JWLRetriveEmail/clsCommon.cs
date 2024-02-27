@@ -21,10 +21,12 @@ namespace JWLRetriveEmail
     class clsCommon
     {
         public static bool IsException = false;
+        JWLCryptography.CommonCryptography Crypto = new JWLCryptography.CommonCryptography();
         public string GetConfigValue(string Key)
         {
             string retVal = "";
-            retVal = ConfigurationManager.AppSettings[Key];
+           // retVal =   ConfigurationManager.AppSettings[Key];
+            retVal = Crypto.Decrypt(ConfigurationManager.AppSettings[Key]);
             return retVal;
         }
 

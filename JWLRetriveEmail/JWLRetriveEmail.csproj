@@ -61,6 +61,9 @@
     <Reference Include="ExcelNumberFormat, Version=1.0.10.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
       <HintPath>..\packages\ExcelNumberFormat.1.0.10\lib\net20\ExcelNumberFormat.dll</HintPath>
     </Reference>
+    <Reference Include="JWLCryptography">
+      <HintPath>..\..\JWLCryptography\JWLCryptography\bin\Release\JWLCryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.ApplicationBlocks.Data">
       <HintPath>D:\Dayanand\Doc\JWLogistics\Microsoft.ApplicationBlocks.Data.dll</HintPath>
     </Reference>

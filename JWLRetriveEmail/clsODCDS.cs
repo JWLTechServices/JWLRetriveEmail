@@ -2989,6 +2989,7 @@ namespace JWLRetriveEmail
                     int numberofflight = 0;
                     double maximum_miles = 0;
                     double mileage_charge_rate = 0;
+                    double mileage_charge_over_miles = 0;
                     double maximum_men = 0;
                     double extra_man_fees = 0;
                     string will_call_type = string.Empty;
@@ -3070,6 +3071,12 @@ namespace JWLRetriveEmail
                     {
                         mileage_charge_rate = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["mileage_charge_rate"]);
                     }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["mileage_charge_over_miles"])))
+                    {
+                        mileage_charge_over_miles = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["mileage_charge_over_miles"]);
+                    }
+                   
+
                     if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["maximum_men"])))
                     {
                         maximum_men = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["maximum_men"]);
@@ -3126,10 +3133,10 @@ namespace JWLRetriveEmail
                         men = Convert.ToInt32(dr["Men"]);
                     }
 
-                    if (miles > maximum_miles)
+                    if (miles > mileage_charge_over_miles)
                     {
-                        miles = miles - Convert.ToInt32(maximum_miles);
-
+                        miles = miles - Convert.ToInt32(mileage_charge_over_miles);
+                       
                         totalMilesCharge = Math.Round(Convert.ToDouble(miles * mileage_charge_rate), 2);
 
                     }
@@ -3362,6 +3369,8 @@ namespace JWLRetriveEmail
                     int numberofflight = 0;
                     double maximum_miles = 0;
                     double mileage_charge_rate = 0;
+                    double mileage_charge_over_miles = 0;
+                    
                     double maximum_men = 0;
                     double extra_man_fees = 0;
                     string will_call_type = string.Empty;
@@ -3424,6 +3433,10 @@ namespace JWLRetriveEmail
                     {
                         mileage_charge_rate = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["mileage_charge_rate"]);
                     }
+                    if (!string.IsNullOrEmpty(Convert.ToString(tblBillRatesFiltered.Rows[0]["mileage_charge_over_miles"])))
+                    {
+                        mileage_charge_over_miles = Convert.ToDouble(tblBillRatesFiltered.Rows[0]["mileage_charge_over_miles"]);
+                    }
                     if (!string.IsNullOrEmpty(Convert.ToString(tblPayableRatesFiltered.Rows[0]["maximum_men"])))
                     {
                         maximum_men = Convert.ToDouble(tblPayableRatesFiltered.Rows[0]["maximum_men"]);
@@ -3480,9 +3493,9 @@ namespace JWLRetriveEmail
                         men = Convert.ToInt32(dr["Men"]);
                     }
 
-                    if (miles > maximum_miles)
+                    if (miles > mileage_charge_over_miles)
                     {
-                        miles = miles - Convert.ToInt32(maximum_miles);
+                        miles = miles - Convert.ToInt32(mileage_charge_over_miles);
 
                         totalMilesCharge = Math.Round(Convert.ToDouble(miles * mileage_charge_rate), 2);
 
