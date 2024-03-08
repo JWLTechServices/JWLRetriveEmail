@@ -2968,6 +2968,20 @@ namespace JWLRetriveEmail
                         }
                     }
                 }
+                else
+                {
+                    executionLogMessage = "DT-Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString() + System.Environment.NewLine;
+                    executionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values." + System.Environment.NewLine;
+                    executionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                    objCommon.WriteExecutionLog(executionLogMessage);
+                    string fromMail = objCommon.GetConfigValue("FromMailID");
+                    string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                    string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                    string toMail = objCommon.GetConfigValue("CDSSendMissingDieselPriceEmailTo");
+                    string subject = "DT-Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString();
+                    objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, executionLogMessage, "");
+                    throw new NullReferenceException("Diesel price is missing for date  " + dtdeliveryDate.ToShortDateString());
+                }
 
                 const double daysToMonths = 30.4368499;
 
